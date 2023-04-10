@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.LIVE;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.READY;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
 
 @RequiredArgsConstructor
@@ -152,8 +154,12 @@ public class BroadcastDomainService {
     }
 
     private void validIsMemberStartAnotherLiveBroadcast(long creatorId, boolean isStartNow) {
-        if (isStartNow && broadcastDao.isCreatorLiveNow(creatorId)) {
-            throw new BadRequestException(ALREADY_LIVE, "Can't Start Now If Already Live Or Ready, Member Id :" + creatorId);
+        if (isStartNow) {
+           broadcastDao.findLiveOrReadyNowBroadcast(creatorId).ifPresent(
+                   broadcast -> {
+                       if (broadcast.isStatusEq(LIVE)) throw new BadRequestException(ALREADY_LIVE, "Can't Start Now If Already Live, Member Id :" + creatorId);
+                       if (broadcast.isStatusEq(READY)) throw new BadRequestException(ALREADY_READY, "Can't Start Now If Already Ready, Member Id :" + creatorId);
+                   });
         }
     }
 

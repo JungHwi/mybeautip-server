@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -58,8 +59,8 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public boolean isCreatorLiveNow(Long memberId) {
-        return repository.existsByStatusInAndMemberId(List.of(LIVE, READY), memberId);
+    public Optional<Broadcast> findLiveOrReadyNowBroadcast(Long memberId) {
+        return repository.findByStatusInAndMemberId(List.of(LIVE, READY), memberId);
     }
 
     @Transactional(readOnly = true)

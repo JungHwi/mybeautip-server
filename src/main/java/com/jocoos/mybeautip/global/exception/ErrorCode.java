@@ -122,6 +122,7 @@ public enum ErrorCode implements CodeValue {
 
     // Broadcast
     ALREADY_SCHEDULED("이미 예약된 일정이 있음"),
+    ALREADY_READY("이미 준비 중인 라이브가 있음"),
     ALREADY_LIVE("이미 라이브중임");
 
     private final String description;
