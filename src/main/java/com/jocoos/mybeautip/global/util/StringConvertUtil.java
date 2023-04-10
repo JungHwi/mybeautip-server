@@ -23,13 +23,25 @@ public class StringConvertUtil {
         return null;
     }
 
+    public static Map<String, Object> convertJsonToMapObject(String jsonString) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
+            });
+        } catch (JsonProcessingException ex) {
+            log.error("failed convert json string to Map<String, Object>. string >>" + jsonString, ex);
+        }
+
+        return null;
+    }
+
     public static Map<String, String> convertJsonToMap(String jsonString) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
             });
         } catch (JsonProcessingException ex) {
-            log.error("failed convert json string to map. string >>" + jsonString, ex);
+            log.error("failed convert json string to Map<String, String>. string >>" + jsonString, ex);
         }
 
         return null;

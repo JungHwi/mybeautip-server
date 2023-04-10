@@ -17,10 +17,10 @@ import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepos
 import com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE_PERMISSION
 import com.jocoos.mybeautip.domain.system.persistence.repository.SystemOptionRepository
 import com.jocoos.mybeautip.global.dto.FileDto
+import com.jocoos.mybeautip.global.exception.ErrorCode
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.security.JwtTokenProvider
-import com.jocoos.mybeautip.support.RandomUtils
 import com.jocoos.mybeautip.testutil.container.TestContainerConfig
 import com.jocoos.mybeautip.testutil.fixture.*
 import org.junit.jupiter.api.BeforeEach
@@ -42,13 +42,15 @@ import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPri
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.filter.CharacterEncodingFilter
-import java.util.Base64
+import java.util.*
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
@@ -181,4 +183,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
         given(flipFlopLiteClient.invisibleMessage(anyLong(), anyLong())).willReturn(null)
     }
 
+    fun isErrorCode(errorCode: ErrorCode): ResultMatcher {
+        return jsonPath("\$.[?(@.error == '%s')]", errorCode.key).exists()
+    }
 }
