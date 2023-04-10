@@ -26,8 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.LIVE;
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.READY;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
 
 @RequiredArgsConstructor
@@ -138,6 +137,9 @@ public class BroadcastDomainService {
     }
 
     private BroadcastEditResult edit(Broadcast broadcast, BroadcastEditCommand command) {
+        if (broadcast.isStatusEq(SCHEDULED) && command.isStartNow()) {
+            validIsMemberStartAnotherLiveBroadcast(broadcast.getMemberId(), true);
+        }
         OriginalInfo originalInfo = new OriginalInfo(broadcast);
         broadcast.edit(command);
         Broadcast editedBroadcast = broadcastDao.save(broadcast);
