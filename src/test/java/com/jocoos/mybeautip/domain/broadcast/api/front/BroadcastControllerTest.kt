@@ -471,7 +471,7 @@ class BroadcastControllerTest(
 
         result.andDo(
             document(
-                "choose_visibility_vod_by_end_of_broadcast",
+                "choose_visibility_vod_by_end_of_broadcast_fail",
                ExceptionFieldsSnippet(errorCode.key, exceptionConvertFieldDescriptor(result, "요청한 유저가 해당 방송의 오너가 아닐때"))
             )
         )
