@@ -454,7 +454,7 @@ class BroadcastControllerTest(
     }
 
     @Test
-    fun `Broadcast Choose Vod Visibility API - Broadcast NotFoundException`() {
+    fun `Broadcast Choose Vod Visibility API - Fail ACCESS_DENIED`() {
         val request = BooleanDto(true)
 
         val errorCode = ACCESS_DENIED
