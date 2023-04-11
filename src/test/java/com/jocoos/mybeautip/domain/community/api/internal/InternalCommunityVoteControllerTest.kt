@@ -8,12 +8,13 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVo
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
-import com.jocoos.mybeautip.testutil.fixture.makeCommunity
-import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
-import com.jocoos.mybeautip.testutil.fixture.makeCommunityFile
-import com.jocoos.mybeautip.testutil.fixture.makeCommunityVote
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import com.jocoos.mybeautip.member.LegacyMemberService
+import com.jocoos.mybeautip.member.Member
+import com.jocoos.mybeautip.member.MemberRepository
+import com.jocoos.mybeautip.testutil.fixture.*
+import org.junit.jupiter.api.*
+import org.mockito.BDDMockito
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
@@ -25,11 +26,27 @@ import org.springframework.restdocs.request.RequestDocumentation.pathParameters
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InternalCommunityVoteControllerTest(
     private val communityRepository: CommunityRepository,
-    private val communityCategoryRepository: CommunityCategoryRepository
+    private val communityCategoryRepository: CommunityCategoryRepository,
+    private val memberRepository: MemberRepository
 ) : RestDocsIntegrationTestSupport() {
 
+    private lateinit var writer: Member
+
+    @MockBean
+    private val legacyMemberService: LegacyMemberService? = null
+
+    @BeforeAll
+    fun beforeAll() {
+        writer = memberRepository.save(makeMember(link = 2))
+    }
+
+    @BeforeEach
+    fun setUp() {
+        BDDMockito.given(legacyMemberService!!.currentMember()).willReturn(writer)
+    }
 
     @DisplayName("투표 성공 테스트")
     @Test
@@ -40,7 +57,8 @@ class InternalCommunityVoteControllerTest(
 
         val resultActions = mockMvc.perform(
             patch("/internal/1/community/{community_id}/vote/{vote_id}", community.id, communityVoteToVote.id)
-                .header(AUTHORIZATION, requestUserToken)
+                .header(AUTHORIZATION, requestInternalToken)
+                .header(InternalCommunityControllerTest.MEMBER_ID, writer.id)
         )
             .andExpect(status().isOk)
             .andDo(print())
