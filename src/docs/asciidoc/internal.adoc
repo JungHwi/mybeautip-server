@@ -64,6 +64,8 @@ include::internal_overview.adoc[]
 * link:community/internal_delete_community.html[Delete Community API, window=_blank]
 * link:community/internal_like_community.html[Like Community API, window=_blank]
 * link:community/internal_report_community.html[Report Community API, window=_blank]
+* link:community/internal_vote_community.html[Vote Community API, window=_blank]
+
 
 === Community Comment API
 * link:community/internal_get_community_comments.html[Get Community Comments API, window=_blank]
