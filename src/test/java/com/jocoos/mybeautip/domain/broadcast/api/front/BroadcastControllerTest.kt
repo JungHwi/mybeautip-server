@@ -15,10 +15,14 @@ import com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.global.config.restdoc.util.ExceptionFieldsSnippet
+import com.jocoos.mybeautip.global.config.restdoc.util.ExceptionFieldsSnippet.exceptionConvertFieldDescriptor
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.global.dto.single.IntegerDto
 import com.jocoos.mybeautip.global.exception.ErrorCode
+import com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED
+import com.jocoos.mybeautip.global.exception.ErrorCode.NOT_FOUND
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import com.jocoos.mybeautip.testutil.fixture.makeVod
 import org.junit.jupiter.api.AfterAll
@@ -448,6 +452,31 @@ class BroadcastControllerTest(
             )
         )
     }
+
+    @Test
+    fun `Broadcast Choose Vod Visibility API - Broadcast NotFoundException`() {
+        val request = BooleanDto(true)
+
+        val errorCode = ACCESS_DENIED
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/api/1/broadcast/{broadcast_id}/vod-visibility", 0)
+                    .header(AUTHORIZATION, defaultInfluencerToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().is4xxClientError)
+            .andExpect(isErrorCode(errorCode))
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "choose_visibility_vod_by_end_of_broadcast",
+               ExceptionFieldsSnippet(errorCode.key, exceptionConvertFieldDescriptor(result, "요청한 유저가 해당 방송의 오너가 아닐때"))
+            )
+        )
+    }
+
 
     private fun saveTwoBroadcast() {
         broadcastRepository.saveAll(

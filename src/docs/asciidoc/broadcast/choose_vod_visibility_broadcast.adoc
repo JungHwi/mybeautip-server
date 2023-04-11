@@ -1,0 +1,7 @@
+== Choose Vod Visibility By End Of Broadcast API
+
+operation::choose_visibility_vod_by_end_of_broadcast[snippets='http-request,path-parameters,request-fields,http-response,response-fields']
+
+== Exception
+include::{snippets}/choose_visibility_vod_by_end_of_broadcast/exception_access_denied-fields.adoc[]
+
