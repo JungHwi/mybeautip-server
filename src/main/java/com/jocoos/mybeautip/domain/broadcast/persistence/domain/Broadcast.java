@@ -196,10 +196,6 @@ public class Broadcast extends CreatedAtBaseEntity {
     }
 
     public String getThumbnailUrl() {
-        // FIXME Delete This If After Test
-        if (thumbnail.isBlank()) {
-            return "https://static-dev.mybeautip.com/common/default/share_square_image.jpg";
-        }
         return toUrl(thumbnail, BROADCAST, id);
     }
 

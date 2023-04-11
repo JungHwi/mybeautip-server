@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface VodConverter {
 
+    @Mapping(target = "broadcastId", source = "id")
     @Mapping(target = "isVisible", constant = "false")
     @Mapping(target = "status", constant = "CREATED")
     Vod init(Broadcast broadcast);

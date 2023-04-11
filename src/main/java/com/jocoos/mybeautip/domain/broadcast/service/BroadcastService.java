@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
+import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.IsVisibleResponse;
 import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.NotificationResponse;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -144,6 +145,11 @@ public class BroadcastService {
             case MESSAGE ->
                     domainService.messageReport(broadcastId, reporterId, request.reportedId(), request.reason(), request.description());
         };
+    }
+
+    @Transactional
+    public IsVisibleResponse chooseVodVisibilityByEndOfBroadcast(Long broadcastId, boolean isVisible) {
+        return broadcastVodService.chooseVodVisibilityByEndOfBroadcast(broadcastId, isVisible);
     }
 
     public HeartCountResponse addHeartCount(Long broadcastId, int heartCount) {

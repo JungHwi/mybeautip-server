@@ -45,6 +45,12 @@ public class VodDao {
     }
 
     @Transactional(readOnly = true)
+    public Vod getByBroadcastId(Long broadcastId) {
+        return repository.findByBroadcastId(broadcastId)
+                .orElseThrow(() -> new NotFoundException("Vod not found. BroadcastId: " + broadcastId));
+    }
+
+    @Transactional(readOnly = true)
     public Vod getForUpdate(long vodId) {
         return repository.selectForUpdate(vodId).orElseThrow(vodNotFound(vodId));
     }

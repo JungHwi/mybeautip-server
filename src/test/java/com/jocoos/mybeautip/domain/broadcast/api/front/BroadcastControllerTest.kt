@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastStatusRequest
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.file.code.FileType.IMAGE
+import com.jocoos.mybeautip.domain.vod.persistence.repository.VodRepository
 import com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
@@ -17,7 +18,9 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.gen
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.global.dto.single.IntegerDto
+import com.jocoos.mybeautip.global.exception.ErrorCode
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
+import com.jocoos.mybeautip.testutil.fixture.makeVod
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -38,7 +41,8 @@ import java.time.ZonedDateTime.now
 
 @TestInstance(PER_CLASS)
 class BroadcastControllerTest(
-    private val broadcastRepository: BroadcastRepository
+    private val broadcastRepository: BroadcastRepository,
+    private val vodRepository: VodRepository
 ) : BroadcastTestSupport() {
 
     private lateinit var broadcast: Broadcast
@@ -408,6 +412,38 @@ class BroadcastControllerTest(
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Broadcast Choose Visibility Of Vod By End Of Broadcast API - Success`() {
+        vodRepository.save(makeVod(broadcast))
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/api/1/broadcast/{broadcast_id}/vod-visibility", broadcast.id)
+                    .header(AUTHORIZATION, defaultInfluencerToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "choose_visibility_vod_by_end_of_broadcast",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                requestFields(
+                    fieldWithPath("bool").type(BOOLEAN).description("VOD 공개 여부")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("VOD 아이디"),
+                    fieldWithPath("is_visible").type(BOOLEAN).description("VOD 공개 여부"),
                 )
             )
         )
