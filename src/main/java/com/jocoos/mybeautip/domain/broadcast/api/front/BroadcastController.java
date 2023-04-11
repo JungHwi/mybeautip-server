@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
+import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.IsVisibleResponse;
 import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.NotificationResponse;
 import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
@@ -106,4 +107,10 @@ public class BroadcastController {
         return service.getHeartCount(broadcastId);
     }
 
+    @CheckPermission({INFLUENCER})
+    @PatchMapping("/1/broadcast/{broadcastId}/vod-visibility")
+    public IsVisibleResponse chooseVodVisibilityByEndOfBroadcast(@PathVariable Long broadcastId,
+                                                                 @RequestBody BooleanDto isVisible) {
+        return service.chooseVodVisibilityByEndOfBroadcast(broadcastId, isVisible.isBool());
+    }
 }

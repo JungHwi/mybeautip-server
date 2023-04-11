@@ -55,6 +55,8 @@ create table vod
     category_id       bigint                                                              not null comment '카테고리 아이디',
     member_id         bigint                                                              not null comment '회원 아이디',
     video_key         bigint                                                              not null comment '외부 비디오 키',
+    broadcast_id      bigint not null comment '방송 ID',
+    url               varchar(200) comment 'VOD URL',
     status            varchar(20)                                                         not null comment '상태',
     is_visible        boolean                                                             not null comment '노출여부',
     title             varchar(200)                                                        not null comment '제목',

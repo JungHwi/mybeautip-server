@@ -3,7 +3,10 @@ package com.jocoos.mybeautip.domain.broadcast.service.dao;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository;
-import com.jocoos.mybeautip.domain.broadcast.vo.*;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateCandidate;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateCandidateCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +22,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -110,7 +114,7 @@ public class BroadcastDao {
     }
 
     private Supplier<NotFoundException> broadcastNotFoundException(long broadcastId) {
-        return () -> new NotFoundException("Not found broadcast. id - " + broadcastId);
+        return () -> new NotFoundException(NOT_FOUND, "Not found broadcast. id - " + broadcastId);
     }
 
     @Transactional

@@ -19,7 +19,7 @@ public interface VodRepository extends ExtendedQuerydslJpaRepository<Vod, Long>,
     @Query("select v from Vod v where v.id = :id")
     Optional<Vod> selectForUpdate(@Param("id") Long id);
 
-    Optional<Vod> findByVideoKey(Long videoKey);
+    Optional<Vod> findByBroadcastId(Long broadcastId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Vod v set v.reportCount = v.reportCount + :count where v.id = :id")

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,17 +98,13 @@ public class AwsS3Handler {
         return cloudFront + path;
     }
 
+    @Nullable
     public String copyWithKeepOriginal(String fileUrl, String destination) {
         if (isBlank(fileUrl)) {
             return null;
         }
-
         String filename = getFileName(fileUrl);
-
-        String path = service.copyWithKeepOriginal(
-                TEMP_IMAGE.getDirectory() + filename,
-                destination + filename);
-
+        String path = service.copyWithKeepOriginal(fileUrl, destination + filename);
         return cloudFront + path;
     }
 

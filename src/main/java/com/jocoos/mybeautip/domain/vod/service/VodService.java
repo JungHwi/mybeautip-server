@@ -107,6 +107,12 @@ public class VodService {
         return ScrapResponseV2.from(scrap);
     }
 
+    @Transactional
+    public void changeVisibility(Long vodId, Long memberId, boolean isVisible) {
+        Vod vod = vodDao.get(vodId);
+        vod.changeVisibility(isVisible);
+    }
+
     private List<Long> getCategories(long categoryId) {
         return categoryDao.getCategories(categoryId)
                 .stream()
