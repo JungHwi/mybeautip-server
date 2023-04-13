@@ -61,9 +61,10 @@ fun makeVodIntegrationInfo(
     thumbnail: String = "thumbnail",
     category: BroadcastCategory,
     startedAt: ZonedDateTime = ZonedDateTime.now().minusDays(1),
+    transcodeAt: ZonedDateTime = ZonedDateTime.now(),
     heartCount: Int = 0
 ) : VodIntegrationInfo {
-    return VodIntegrationInfo(url, title, notice, thumbnail, category, startedAt, heartCount)
+    return VodIntegrationInfo(url, title, notice, thumbnail, category, startedAt, heartCount, transcodeAt)
 }
 
 fun makeVodScrap(

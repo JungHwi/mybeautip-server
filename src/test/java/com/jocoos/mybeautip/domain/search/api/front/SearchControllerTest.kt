@@ -11,6 +11,8 @@ import com.jocoos.mybeautip.domain.search.code.SearchType.COMMUNITY
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository
 import com.jocoos.mybeautip.domain.vod.persistence.repository.VodRepository
+import com.jocoos.mybeautip.domain.vod.vodListResponse
+import com.jocoos.mybeautip.domain.vod.vodListResponseWithRelationInfo
 import com.jocoos.mybeautip.testutil.fixture.*
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*
@@ -311,26 +313,10 @@ class SearchControllerTest(
                 responseFields(
                     fieldWithPath("next_cursor").type(STRING).description("커서 정보 (VOD 아이디)"),
                     fieldWithPath("count").type(NUMBER).description("검색 결과 수"),
-                    fieldWithPath("vod").type(ARRAY).description("VOD 목록"),
-                    fieldWithPath("vod.[].id").type(NUMBER).description("VOD 아이디"),
-                    fieldWithPath("vod.[].url").type(STRING).description("VOD URL"),
-                    fieldWithPath("vod.[].title").type(STRING).description("타이틀"),
-                    fieldWithPath("vod.[].thumbnail_url").type(STRING).description("썸네일 URL"),
-                    fieldWithPath("vod.[].view_count").type(NUMBER).description("조회수"),
-                    fieldWithPath("vod.[].heart_count").type(NUMBER).description("하트수"),
-                    fieldWithPath("vod.[].category").type(OBJECT).description("카테고리 정보"),
-                    fieldWithPath("vod.[].category.id").type(NUMBER).description("카테고리 아이디"),
-                    fieldWithPath("vod.[].category.title").type(STRING).description("카테고리 타이틀"),
-                    fieldWithPath("vod.[].member").type(OBJECT).description("회원 정보"),
-                    fieldWithPath("vod.[].member.id").type(NUMBER).description("회원 아이디"),
-                    fieldWithPath("vod.[].member.email").type(STRING).description("회원 이메일").optional(),
-                    fieldWithPath("vod.[].member.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("vod.[].member.avatar_url").type(STRING).description("회원 아바타 URL"),
-                    fieldWithPath("vod.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
-                    fieldWithPath("vod.[].relation_info.is_scrap").type(BOOLEAN).description("요청자 연관 정보 - 스크랩 여부"),
+                    fieldWithPath("vod").type(ARRAY).description("VOD 목록"))
+                    .and(vodListResponseWithRelationInfo("vod.[]"))
                 )
             )
-        )
     }
 
     @Test

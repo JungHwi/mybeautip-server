@@ -70,6 +70,7 @@ create table vod
     duration          bigint                                                              not null comment '영상 길이',
     chat_channel_key  varchar(30)                                                         not null comment '채팅룸 키',
     chat_started_at   datetime comment '채팅 시작 시간',
+    transcode_at datetime comment '변환 일자',
     created_at datetime not null comment 'VOD 생성시간',
     modified_at       datetime                                                            not null comment 'VOD 수정시간'
 ) charset = utf8mb4 comment 'VOD 정보';

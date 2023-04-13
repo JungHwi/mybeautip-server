@@ -82,6 +82,9 @@ public class Vod extends BaseEntity {
     @Column
     private ZonedDateTime chatStartedAt;
 
+    @Column
+    private ZonedDateTime transcodeAt;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "category_id")
     private BroadcastCategory category;
@@ -122,6 +125,7 @@ public class Vod extends BaseEntity {
         this.category = integrationInfo.category();
         this.chatStartedAt = integrationInfo.startedAt();
         this.liveHeartCount = integrationInfo.heartCount();
+        this.transcodeAt = integrationInfo.transcodeAt();
         this.status = AVAILABLE;
     }
 
