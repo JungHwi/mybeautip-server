@@ -16,6 +16,7 @@ fun broadcastListResponse(prefix : String): List<FieldDescriptor> = mutableListO
     fieldWithPath(prefix + "viewer_count").type(NUMBER).description("시청자수"),
     fieldWithPath(prefix + "heart_count").type(NUMBER).description("좋아요수"),
     fieldWithPath(prefix + "started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
+    fieldWithPath(prefix + "ended_at").type(STRING).description("종료 시간").attributes(getZonedDateFormat()).optional(),
     fieldWithPath(prefix + "category").type(OBJECT).description("카테고리 정보"),
     fieldWithPath(prefix + "category.id").type(NUMBER).description("카테고리 ID"),
     fieldWithPath(prefix + "category.title").type(STRING).description("카테고리 타이틀"),

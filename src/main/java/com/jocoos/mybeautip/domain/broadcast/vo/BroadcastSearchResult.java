@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.broadcast.vo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.client.flipfloplite.dto.PinMessageInfo;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCategoryResponse;
@@ -14,8 +13,6 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 
 import java.time.ZonedDateTime;
-
-import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 @Getter
 public class BroadcastSearchResult {
@@ -34,13 +31,9 @@ public class BroadcastSearchResult {
     private final int viewerCount;
     private final int maxViewerCount;
     private final int heartCount;
-
-    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime startedAt;
-
-    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    private final ZonedDateTime endedAt;
     private final ZonedDateTime createdAt;
-
     private final BroadcastCategoryResponse category;
     private final SimpleMemberInfo createdBy;
     private final PinMessageInfo pinMessage;
@@ -67,6 +60,7 @@ public class BroadcastSearchResult {
         this.heartCount = statistics.getHeartCount();
         this.startedAt = broadcast.getStartedAt();
         this.createdAt = broadcast.getCreatedAt();
+        this.endedAt = broadcast.getEndedAt();
         this.category = new BroadcastCategoryResponse(category);
         this.createdBy = new SimpleMemberInfo(member);
         this.pinMessage = PinMessageInfo.pin(pinMessage);
