@@ -19,6 +19,7 @@ public record BroadcastListResponse(long id,
                                     int viewerCount,
                                     int heartCount,
                                     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
+                                    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime endedAt,
                                     SimpleMemberInfo createdBy,
                                     BroadcastRelationInfo relationInfo)
         implements CursorInterface {
