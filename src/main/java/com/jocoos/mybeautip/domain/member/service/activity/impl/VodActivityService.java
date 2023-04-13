@@ -42,7 +42,6 @@ public class VodActivityService implements MyActivityService<VodListResponse> {
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(request.idCursor(), defaultSort.getSortField());
         Pageable pageable = PageRequest.of(0, request.size(), defaultSort.getSort(DESC));
         VodSearchCondition condition = VodSearchCondition.builder()
-                .isVisible(true)
                 .status(AVAILABLE)
                 .memberId(memberId)
                 .cursorPaging(cursorPaging)

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.member.service.activity.impl;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastListResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPermission;
@@ -21,12 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @RequiredArgsConstructor
 @Service
 public class BroadcastActivityService implements MyActivityService<BroadcastListResponse> {
 
+    private static final List<BroadcastStatus> MY_BROADCAST_STATUSES = List.of(SCHEDULED, READY, LIVE, CANCEL);
     private final BroadcastDao broadcastDao;
     private final BroadcastRelationService relationService;
     private final BroadcastPermissionDao permissionDao;
@@ -45,6 +48,7 @@ public class BroadcastActivityService implements MyActivityService<BroadcastList
                 .memberId(memberId)
                 .pageable(PageRequest.of(0, request.size(), SORTED_STATUS.getSort(ASC)))
                 .cursor(request.idCursor())
+                .statuses(MY_BROADCAST_STATUSES)
                 .build();
         List<BroadcastSearchResult> results = broadcastDao.getList(condition);
         Map<Long, BroadcastRelationInfo> relationInfoMap = relationService.getRelationInfoMapForMember(request.member().getId(), results);

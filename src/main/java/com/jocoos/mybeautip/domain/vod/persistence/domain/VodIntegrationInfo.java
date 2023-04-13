@@ -13,7 +13,8 @@ public record VodIntegrationInfo(String url,
                                  String thumbnail,
                                  BroadcastCategory category,
                                  ZonedDateTime startedAt,
-                                 Integer heartCount) {
+                                 Integer heartCount,
+                                 ZonedDateTime transcodeAt) {
 
     public static VodIntegrationInfo from(Broadcast broadcast) {
         return VodIntegrationInfo.builder()
