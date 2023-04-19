@@ -50,6 +50,9 @@ public class EnumDocs {
     Map<String, String> communityStatus;
     Map<String, String> communityCategoryType;
 
+    // Company
+    Map<String, String> companyStatus;
+
     // Video
     Map<String, String> videoCategoryType;
     Map<String, String> videoMaskType;

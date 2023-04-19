@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState;
 import com.jocoos.mybeautip.domain.broadcast.code.*;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
+import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
 import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
@@ -90,6 +91,9 @@ public class CommonDocController {
         // Community
         Map<String, String> communityCategoryType = getDocs(CommunityCategoryType.values());
         Map<String, String> communityStatus = getDocs(CommunityStatus.values());
+
+        // Company
+        Map<String, String> companyStatus = getDocs(CompanyStatus.values());
 
         // Video
         Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
@@ -181,6 +185,8 @@ public class CommonDocController {
                 // Community
                         .communityCategoryType(communityCategoryType)
                         .communityStatus(communityStatus)
+                // Company
+                        .companyStatus(companyStatus)
                 // Video
                         .videoCategoryType(videoCategoryType)
                         .videoMaskType(videoMaskType)

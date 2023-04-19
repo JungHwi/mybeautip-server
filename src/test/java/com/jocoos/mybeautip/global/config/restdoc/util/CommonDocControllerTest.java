@@ -149,10 +149,15 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("CommunityStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getCommunityStatus()))
                         ),
+                        // Company
+                        customResponseFields("custom-response", beneathPath("data.community_category_type").withSubsectionId("community_category_type"),
+                                attributes(key("title").value("CommunityCategoryType")),
+                                enumConvertFieldDescriptor((enumDocs.getCommunityCategoryType()))
+                        ),
                         // Video
-                        customResponseFields("custom-response", beneathPath("data.video_category_type").withSubsectionId("video_category_type"),
-                                attributes(key("title").value("VideoCategoryType")),
-                                enumConvertFieldDescriptor((enumDocs.getVideoCategoryType()))
+                        customResponseFields("custom-response", beneathPath("data.company_status").withSubsectionId("company_status"),
+                                attributes(key("title").value("CompanyStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getCompanyStatus()))
                         ),
                         customResponseFields("custom-response", beneathPath("data.video_mask_type").withSubsectionId("video_mask_type"),
                                 attributes(key("title").value("VideoMaskType")),
