@@ -1,10 +1,14 @@
 package com.jocoos.mybeautip.domain.company.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
 import com.jocoos.mybeautip.domain.company.vo.CompanyAccountVo;
 import com.jocoos.mybeautip.domain.company.vo.CompanyClaimVo;
 
+import java.time.ZonedDateTime;
 import java.util.List;
+
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 public record CompanyResponse(long id,
                               String name,
@@ -21,6 +25,7 @@ public record CompanyResponse(long id,
                               String zipcode,
                               String address1,
                               String address2,
+                              @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime createdAt,
                               CompanyClaimVo claim,
                               List<CompanyAccountVo> accounts) {
 }

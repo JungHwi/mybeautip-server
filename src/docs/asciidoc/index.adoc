@@ -236,6 +236,7 @@ include::overview.adoc[]
 
 === Admin Company API
 * link:company/admin_create_company.html[공급사 생성 API, window=_blank]
+* link:company/admin_search_company.html[공급사 조회 API, window=_blank]
 
 === Admin EVENT API
 * link:event/admin_create_event.html[이벤트 생성 API, window=_blank]
