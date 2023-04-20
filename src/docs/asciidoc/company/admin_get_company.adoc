@@ -1,0 +1,3 @@
+== Admin Get Company API
+
+operation::admin_get_company[snippets='http-request,path-parameters,http-response,response-fields']

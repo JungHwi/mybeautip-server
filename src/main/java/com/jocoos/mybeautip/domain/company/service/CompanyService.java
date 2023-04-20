@@ -31,4 +31,9 @@ public class CompanyService {
         List<CompanyListResponse> contents = converter.convertsToList(result.getContent());
         return new PageResponse<>(result.getTotalElements(), contents);
     }
+
+    public CompanyResponse get(long companyId) {
+        Company company = dao.get(companyId);
+        return converter.converts(company);
+    }
 }

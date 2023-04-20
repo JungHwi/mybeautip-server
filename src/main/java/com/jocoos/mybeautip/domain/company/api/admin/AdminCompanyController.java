@@ -43,4 +43,10 @@ public class AdminCompanyController {
 
         return service.search(request);
     }
+
+    @GetMapping("/company/{companyId}")
+    public CompanyResponse get(@PathVariable long companyId) {
+
+        return service.get(companyId);
+    }
 }

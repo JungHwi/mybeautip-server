@@ -17,8 +17,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
-import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
-import org.springframework.restdocs.request.RequestDocumentation.requestParameters
+import org.springframework.restdocs.request.RequestDocumentation.*
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -151,6 +150,58 @@ class AdminCompanyControllerTest(
                     fieldWithPath("content.[].sales_fee").type(NUMBER).description("판매 수수료 (%)"),
                     fieldWithPath("content.[].shipping_fee").type(NUMBER).description("배송 수수료 (%)"),
                     fieldWithPath("content.[].created_at").type(STRING).description("생성 시간").attributes(DocumentAttributeGenerator.getZonedDateFormat())
+                )
+            )
+        )
+    }
+
+    @Test
+    fun get() {
+        val company = saveCompany();
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/company/{companyId}", company.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_get_company",
+                pathParameters(
+                    parameterWithName("companyId").description("공급사 ID")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("공급사 ID"),
+                    fieldWithPath("name").type(STRING).description("공급사명"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
+                    fieldWithPath("sales_fee").type(NUMBER).description("판매 수수료 (%)"),
+                    fieldWithPath("shipping_fee").type(NUMBER).description("배송 수수료 (%)"),
+                    fieldWithPath("business_name").type(STRING).description("상호명"),
+                    fieldWithPath("business_number").type(STRING).description("사업자 번호"),
+                    fieldWithPath("representative_name").type(STRING).description("대표자명"),
+                    fieldWithPath("email").type(STRING).description("이메일"),
+                    fieldWithPath("phone_number").type(STRING).description("전화번호"),
+                    fieldWithPath("business_type").type(STRING).description("업태"),
+                    fieldWithPath("business_item").type(STRING).description("업종"),
+                    fieldWithPath("zipcode").type(STRING).description("우편번호"),
+                    fieldWithPath("address1").type(STRING).description("주소"),
+                    fieldWithPath("address2").type(STRING).description("상세 주소"),
+                    fieldWithPath("created_at").type(STRING).description("생성 시간").attributes(DocumentAttributeGenerator.getZonedDateFormat()),
+                    fieldWithPath("claim").type(OBJECT).description("claim 정보").optional(),
+                    fieldWithPath("claim.customer_center_phone").type(STRING).description("고객센터 전화번호").optional(),
+                    fieldWithPath("claim.zipcode").type(STRING).description("교환 / 환불 - 우편번호").optional(),
+                    fieldWithPath("claim.address1").type(STRING).description("교환 / 환불 - 주소").optional(),
+                    fieldWithPath("claim.address2").type(STRING).description("교환 / 환불 - 상세 주소").optional(),
+                    fieldWithPath("accounts").type(ARRAY).description("계좌 List").optional(),
+                    fieldWithPath("accounts.[].id").type(NUMBER).description("계좌 아이디").optional(),
+                    fieldWithPath("accounts.[].bank_name").type(STRING).description("은행명").optional(),
+                    fieldWithPath("accounts.[].account_number").type(STRING).description("계좌번호").optional(),
+                    fieldWithPath("accounts.[].owner_name").type(STRING).description("예금주명").optional(),
                 )
             )
         )

@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.company.dto.CompanySearchRequest;
 import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest;
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
 import com.jocoos.mybeautip.domain.company.persistence.repository.CompanyRepository;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -24,5 +25,11 @@ public class CompanyDao {
     @Transactional(readOnly = true)
     public Page<Company> search(CompanySearchRequest request) {
         return repository.search(request);
+    }
+
+    @Transactional(readOnly = true)
+    public Company get(long companyId) {
+        return repository.findById(companyId)
+                .orElseThrow(() -> new NotFoundException("Company Not Found. Id is " + companyId));
     }
 }
