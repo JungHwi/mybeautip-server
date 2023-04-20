@@ -30,7 +30,7 @@ create table company_account
 
 create table company_claim
 (
-    id                      bigint auto_increment primary key comment '공급사 아이디',
+    id                      bigint auto_increment primary key comment '공급사 클레임 아이디',
     company_id              bigint not null comment '공급사 아이디',
     customer_center_phone   varchar(20) comment '고객센터 전화번호',
     zipcode                 varchar(6) not null comment '우편번호',
@@ -38,9 +38,19 @@ create table company_claim
     address2                varchar(50) not null comment '상세 주소'
 ) charset = utf8mb4 comment '공급사 정보';
 
+create table company_permission
+(
+    id                      bigint auto_increment primary key comment '공급사 권한 아이디',
+    company_id              bigint not null comment '공급사 아이디',
+    create_product          varchar(20) comment '상품 등록 권한',
+    update_product          varchar(20) comment '상품 수정 권한',
+    delete_product          varchar(20) comment '상품 삭제 권한'
+) charset = utf8mb4 comment '공급사 권한 정보';
+
 
 
 # delete from flyway_schema_history where version = '0158';
 # drop table company;
 # drop table company_account;
 # drop table company_claim;
+# drop table company_permission;

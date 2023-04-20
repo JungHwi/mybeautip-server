@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
 import com.jocoos.mybeautip.domain.company.vo.CompanyAccountVo;
 import com.jocoos.mybeautip.domain.company.vo.CompanyClaimVo;
+import com.jocoos.mybeautip.domain.company.vo.CompanyPermissionVo;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -27,5 +28,6 @@ public record CompanyResponse(long id,
                               String address2,
                               @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime createdAt,
                               CompanyClaimVo claim,
+                              CompanyPermissionVo permission,
                               List<CompanyAccountVo> accounts) {
 }

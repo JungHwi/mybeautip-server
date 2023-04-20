@@ -1,16 +1,16 @@
 package com.jocoos.mybeautip.testutil.fixture
 
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus
+import com.jocoos.mybeautip.domain.company.code.ProcessPermission
 import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company
 import com.jocoos.mybeautip.domain.company.vo.CompanyClaimVo
-import com.jocoos.mybeautip.global.vo.AccountVo
+import com.jocoos.mybeautip.domain.company.vo.CompanyPermissionVo
 
 fun makeCompany(
     request: CreateCompanyRequest = makeCompanyRequest()
 ): Company {
-    val company = Company(request)
-    return company
+    return Company(request)
 }
 
 fun makeCompanyRequest(
@@ -29,7 +29,8 @@ fun makeCompanyRequest(
     address1: String = "태양계 지구 한국",
     address2: String = "서울 강남구",
     claim: CompanyClaimVo = createClaim(),
-    accounts: List<AccountVo> = createAccount()
+    permission: CompanyPermissionVo = createPermission(),
+    accounts: List<CompanyAccountVo> = createAccount()
 ): CreateCompanyRequest {
     return CreateCompanyRequest(
         name,
@@ -47,6 +48,7 @@ fun makeCompanyRequest(
         address1,
         address2,
         claim,
+        permission,
         accounts
     )
 }
@@ -65,14 +67,29 @@ fun createClaim(
     )
 }
 
+fun createPermission(
+    createProduct: ProcessPermission = ProcessPermission.ADMINISTRATOR,
+    updateProduct: ProcessPermission = ProcessPermission.ADMINISTRATOR,
+    deleteProduct: ProcessPermission = ProcessPermission.ADMINISTRATOR
+): CompanyPermissionVo {
+    return CompanyPermissionVo(
+        createProduct,
+        updateProduct,
+        deleteProduct
+    )
+}
+
 fun createAccount(
     bankName: String = "기업은행",
     accountNumber: String = "12345678901234",
     ownerName: String = "예금주"
-): List<AccountVo> {
-    return listOf(AccountVo(
-        bankName,
-        accountNumber,
-        ownerName
-    ))
+): List<CompanyAccountVo> {
+    return listOf(
+        CompanyAccountVo(
+            bankName,
+            accountNumber,
+            ownerName
+        )
+    )
 }
+

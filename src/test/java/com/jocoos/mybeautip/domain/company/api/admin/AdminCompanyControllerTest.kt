@@ -1,12 +1,15 @@
 package com.jocoos.mybeautip.domain.company.api.admin
 
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus
+import com.jocoos.mybeautip.domain.company.code.ProcessPermission
 import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company
 import com.jocoos.mybeautip.domain.company.persistence.repository.CompanyRepository
+import com.jocoos.mybeautip.domain.company.vo.CompanyPermissionVo
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.COMPANY_STATUS
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.PROCESS_PERMISSION
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.testutil.fixture.makeCompany
 import org.junit.jupiter.api.Test
@@ -28,6 +31,12 @@ class AdminCompanyControllerTest(
 
     @Test
     fun create() {
+        val permission = CompanyPermissionVo.builder()
+            .createProduct(ProcessPermission.AUTO)
+            .updateProduct(ProcessPermission.AUTO)
+            .deleteProduct(ProcessPermission.ADMINISTRATOR)
+            .build()
+
         val request = CreateCompanyRequest.builder()
             .name("회사")
             .status(CompanyStatus.ACTIVE)
@@ -43,6 +52,7 @@ class AdminCompanyControllerTest(
             .zipcode("012345")
             .address1("지구 극동아시아 한국")
             .address2("서울")
+            .permission(permission)
             .build()
 
         // when & then
@@ -79,6 +89,10 @@ class AdminCompanyControllerTest(
                     fieldWithPath("claim.zipcode").type(STRING).description("교환 / 환불 - 우편번호").optional(),
                     fieldWithPath("claim.address1").type(STRING).description("교환 / 환불 - 주소").optional(),
                     fieldWithPath("claim.address2").type(STRING).description("교환 / 환불 - 상세 주소").optional(),
+                    fieldWithPath("permission").type(OBJECT).description("권한 정보").optional(),
+                    fieldWithPath("permission.create_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("permission.update_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("permission.delete_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
                     fieldWithPath("accounts").type(ARRAY).description("계좌 List").optional(),
                     fieldWithPath("accounts.[].bank_name").type(STRING).description("은행명").optional(),
                     fieldWithPath("accounts.[].account_number").type(STRING).description("계좌번호").optional(),
@@ -107,6 +121,10 @@ class AdminCompanyControllerTest(
                     fieldWithPath("claim.zipcode").type(STRING).description("교환 / 환불 - 우편번호").optional(),
                     fieldWithPath("claim.address1").type(STRING).description("교환 / 환불 - 주소").optional(),
                     fieldWithPath("claim.address2").type(STRING).description("교환 / 환불 - 상세 주소").optional(),
+                    fieldWithPath("permission").type(OBJECT).description("권한 정보").optional(),
+                    fieldWithPath("permission.create_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("permission.update_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("permission.delete_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
                     fieldWithPath("accounts").type(ARRAY).description("계좌 List").optional(),
                     fieldWithPath("accounts.[].id").type(NUMBER).description("계좌 아이디").optional(),
                     fieldWithPath("accounts.[].bank_name").type(STRING).description("은행명").optional(),
@@ -120,7 +138,7 @@ class AdminCompanyControllerTest(
     @Test
     fun search() {
         // when & then
-        val company = saveCompany();
+        saveCompany();
 
         val result: ResultActions = mockMvc
             .perform(
@@ -149,6 +167,10 @@ class AdminCompanyControllerTest(
                     fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
                     fieldWithPath("content.[].sales_fee").type(NUMBER).description("판매 수수료 (%)"),
                     fieldWithPath("content.[].shipping_fee").type(NUMBER).description("배송 수수료 (%)"),
+                    fieldWithPath("content.[].permission").type(OBJECT).description("권한 정보").optional(),
+                    fieldWithPath("content.[].permission.create_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("content.[].permission.update_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("content.[].permission.delete_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
                     fieldWithPath("content.[].created_at").type(STRING).description("생성 시간").attributes(DocumentAttributeGenerator.getZonedDateFormat())
                 )
             )
@@ -197,6 +219,10 @@ class AdminCompanyControllerTest(
                     fieldWithPath("claim.zipcode").type(STRING).description("교환 / 환불 - 우편번호").optional(),
                     fieldWithPath("claim.address1").type(STRING).description("교환 / 환불 - 주소").optional(),
                     fieldWithPath("claim.address2").type(STRING).description("교환 / 환불 - 상세 주소").optional(),
+                    fieldWithPath("permission").type(OBJECT).description("권한 정보").optional(),
+                    fieldWithPath("permission.create_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("permission.update_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
+                    fieldWithPath("permission.delete_product").type(STRING).description(generateLinkCode(PROCESS_PERMISSION)),
                     fieldWithPath("accounts").type(ARRAY).description("계좌 List").optional(),
                     fieldWithPath("accounts.[].id").type(NUMBER).description("계좌 아이디").optional(),
                     fieldWithPath("accounts.[].bank_name").type(STRING).description("은행명").optional(),

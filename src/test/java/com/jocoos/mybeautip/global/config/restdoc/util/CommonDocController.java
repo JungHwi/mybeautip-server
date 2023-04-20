@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.broadcast.code.*;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
+import com.jocoos.mybeautip.domain.company.code.ProcessPermission;
 import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
@@ -94,6 +95,7 @@ public class CommonDocController {
 
         // Company
         Map<String, String> companyStatus = getDocs(CompanyStatus.values());
+        Map<String, String> processPermission = getDocs(ProcessPermission.values());
 
         // Video
         Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
@@ -187,6 +189,7 @@ public class CommonDocController {
                         .communityStatus(communityStatus)
                 // Company
                         .companyStatus(companyStatus)
+                        .processPermission(processPermission)
                 // Video
                         .videoCategoryType(videoCategoryType)
                         .videoMaskType(videoMaskType)

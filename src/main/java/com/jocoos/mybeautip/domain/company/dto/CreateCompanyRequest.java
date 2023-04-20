@@ -1,8 +1,9 @@
 package com.jocoos.mybeautip.domain.company.dto;
 
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
+import com.jocoos.mybeautip.domain.company.vo.CompanyAccountVo;
 import com.jocoos.mybeautip.domain.company.vo.CompanyClaimVo;
-import com.jocoos.mybeautip.global.vo.AccountVo;
+import com.jocoos.mybeautip.domain.company.vo.CompanyPermissionVo;
 import lombok.Builder;
 
 import java.util.List;
@@ -23,5 +24,6 @@ public record CreateCompanyRequest(String name,
                                    String address1,
                                    String address2,
                                    CompanyClaimVo claim,
-                                   List<AccountVo> accounts) {
+                                   CompanyPermissionVo permission,
+                                   List<CompanyAccountVo> accounts) {
 }

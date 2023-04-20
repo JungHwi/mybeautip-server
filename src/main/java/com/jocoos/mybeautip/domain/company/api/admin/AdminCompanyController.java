@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.domain.company.api.admin;
 
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
-import com.jocoos.mybeautip.domain.company.dto.CompanyListResponse;
-import com.jocoos.mybeautip.domain.company.dto.CompanyResponse;
-import com.jocoos.mybeautip.domain.company.dto.CompanySearchRequest;
-import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest;
+import com.jocoos.mybeautip.domain.company.dto.*;
 import com.jocoos.mybeautip.domain.company.service.CompanyService;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +45,12 @@ public class AdminCompanyController {
     public CompanyResponse get(@PathVariable long companyId) {
 
         return service.get(companyId);
+    }
+
+    @PutMapping("/company/{companyId}")
+    public CompanyResponse edit(@PathVariable long companyId,
+                                @RequestBody EditCompanyRequest request) {
+
+        return service.edit(companyId, request);
     }
 }

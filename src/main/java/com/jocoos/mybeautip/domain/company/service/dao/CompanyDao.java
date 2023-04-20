@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.company.service.dao;
 
 import com.jocoos.mybeautip.domain.company.dto.CompanySearchRequest;
 import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest;
+import com.jocoos.mybeautip.domain.company.dto.EditCompanyRequest;
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
 import com.jocoos.mybeautip.domain.company.persistence.repository.CompanyRepository;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -31,5 +32,12 @@ public class CompanyDao {
     public Company get(long companyId) {
         return repository.findById(companyId)
                 .orElseThrow(() -> new NotFoundException("Company Not Found. Id is " + companyId));
+    }
+
+    @Transactional
+    public Company edit(long companyId, EditCompanyRequest request) {
+        Company company = get(companyId);
+
+        return repository.save(company.edit(request));
     }
 }

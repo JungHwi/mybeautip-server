@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.company.persistence.domain;
 
-import com.jocoos.mybeautip.global.vo.AccountVo;
+import com.jocoos.mybeautip.domain.company.vo.CompanyAccountVo;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +17,7 @@ public class CompanyAccount {
     @Column(insertable = false, updatable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "company_id")
     private Company company;
 
@@ -34,7 +34,20 @@ public class CompanyAccount {
         this.company = company;
     }
 
-    public CompanyAccount(AccountVo vo) {
+    public CompanyAccount(CompanyAccountVo vo) {
+        this.bankName = vo.bankName();
+        this.accountNumber = vo.accountNumber();
+        this.ownerName = vo.ownerName();
+    }
+
+    public CompanyAccount(Company company, CompanyAccountVo vo) {
+        this.company = company;
+        this.bankName = vo.bankName();
+        this.accountNumber = vo.accountNumber();
+        this.ownerName = vo.ownerName();
+    }
+
+    public void edit(CompanyAccountVo vo) {
         this.bankName = vo.bankName();
         this.accountNumber = vo.accountNumber();
         this.ownerName = vo.ownerName();

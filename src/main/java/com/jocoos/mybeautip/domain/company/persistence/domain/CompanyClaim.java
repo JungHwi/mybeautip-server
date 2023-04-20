@@ -38,6 +38,21 @@ public class CompanyClaim {
     }
 
     public CompanyClaim(CompanyClaimVo vo) {
+        if (vo == null) {
+            return;
+        }
+
+        this.customerCenterPhone = vo.customerCenterPhone();
+        this.zipcode = vo.zipcode();
+        this.address1 = vo.address1();
+        this.address2 = vo.address2();
+    }
+
+    public void edit(CompanyClaimVo vo) {
+        if (vo == null) {
+            return;
+        }
+
         this.customerCenterPhone = vo.customerCenterPhone();
         this.zipcode = vo.zipcode();
         this.address1 = vo.address1();
