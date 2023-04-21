@@ -17,7 +17,7 @@ public class CompanyAccount {
     @Column(insertable = false, updatable = false)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
 

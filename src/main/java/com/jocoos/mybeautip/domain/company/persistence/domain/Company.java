@@ -161,21 +161,25 @@ public class Company extends CreatedAtBaseEntity {
     }
 
     public void editAccounts(List<CompanyAccountVo> accounts) {
+        List<CompanyAccount> editedAccounts = new ArrayList<>();
+
         Map<Long, CompanyAccountVo> newAccounts = accounts.stream()
                 .collect(Collectors.toMap(CompanyAccountVo::id, Function.identity()));
 
         for (CompanyAccountVo vo : accounts) {
             if (vo.id() == null) {
-                this.accounts.add(new CompanyAccount(this, vo));
+                editedAccounts.add(new CompanyAccount(this, vo));
             }
         }
 
         for (CompanyAccount account : this.accounts) {
             if (newAccounts.containsKey(account.getId())) {
                 account.edit(newAccounts.get(account.getId()));
-            } else {
-                this.accounts.remove(account);
+                editedAccounts.add(account);
             }
         }
+
+        this.accounts.clear();
+        this.accounts.addAll(editedAccounts);
     }
 }
