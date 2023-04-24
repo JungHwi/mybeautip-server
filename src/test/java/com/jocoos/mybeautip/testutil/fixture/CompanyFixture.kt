@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.company.code.CompanyStatus
 import com.jocoos.mybeautip.domain.company.code.ProcessPermission
 import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company
+import com.jocoos.mybeautip.domain.company.vo.CompanyAccountVo
 import com.jocoos.mybeautip.domain.company.vo.CompanyClaimVo
 import com.jocoos.mybeautip.domain.company.vo.CompanyPermissionVo
 
@@ -80,12 +81,14 @@ fun createPermission(
 }
 
 fun createAccount(
+    id: Long? = null,
     bankName: String = "기업은행",
     accountNumber: String = "12345678901234",
     ownerName: String = "예금주"
 ): List<CompanyAccountVo> {
     return listOf(
         CompanyAccountVo(
+            id,
             bankName,
             accountNumber,
             ownerName

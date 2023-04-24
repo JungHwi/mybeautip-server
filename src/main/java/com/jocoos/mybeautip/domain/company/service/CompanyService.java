@@ -41,6 +41,7 @@ public class CompanyService {
     @Transactional
     public CompanyResponse edit(long companyId, EditCompanyRequest request) {
         Company company = dao.edit(companyId, request);
+        // TODO 상태가 활성 -> 비활성으로 변경될때 브랜드랑 상품 같이 닫기
         return converter.converts(company);
     }
 }

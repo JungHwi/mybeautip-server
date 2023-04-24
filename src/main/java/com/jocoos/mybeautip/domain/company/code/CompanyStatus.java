@@ -9,8 +9,7 @@ import lombok.Getter;
 public enum CompanyStatus implements CodeValue {
 
     ACTIVE("활성"),
-    INACTIVE("비활성"),
-    DELETE("삭제");
+    INACTIVE("비활성");
 
     private final String description;
 
