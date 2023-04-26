@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[company_status]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-brand_status.adoc[]

@@ -69,6 +69,8 @@ public enum ErrorCode implements CodeValue {
     FILE_TOO_BIG("파일 크기가 너무 큼"),
     FILE_CONTENT_TYPE_UNSUPPORTED("지원하는 파일 타입 아님"),
 
+    // Company
+    COMPANY_NOT_AVAILABLE("공급사가 미운영 상태입니다."),
 
     // VIDEO
     VIDEO_NOT_FOUND("비디오 정보 없음"),

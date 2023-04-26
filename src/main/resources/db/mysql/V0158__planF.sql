@@ -15,7 +15,6 @@ create table company
     zipcode             varchar(6) not null comment '우편번호',
     address1            varchar(100) not null comment '주소',
     address2            varchar(50) not null comment '상세 주소',
-
     created_at          datetime not null comment '생성 일시'
 ) charset = utf8mb4 comment '공급사 정보';
 
@@ -47,6 +46,17 @@ create table company_permission
     delete_product          varchar(20) comment '상품 삭제 권한'
 ) charset = utf8mb4 comment '공급사 권한 정보';
 
+create table brand
+(
+    id              bigint auto_increment primary key comment '공급사 권한 아이디',
+    company_id      bigint not null comment '공급사 아이디',
+    code            char(7) unique not null comment '브랜드 코드',
+    status          varchar(20) not null comment '브랜드 상태',
+    name            varchar(20) not null comment '브랜드명',
+    description     varchar(1000) comment '브랜드 정보',
+    created_at      datetime not null comment '생성 일시'
+) charset = utf8mb4 comment '브랜드 정보';
+
 
 
 # delete from flyway_schema_history where version = '0158';
@@ -54,3 +64,4 @@ create table company_permission
 # drop table company_account;
 # drop table company_claim;
 # drop table company_permission;
+# drop table brand;

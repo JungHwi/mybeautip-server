@@ -54,6 +54,9 @@ public class EnumDocs {
     Map<String, String> companyStatus;
     Map<String, String> processPermission;
 
+    // Brand
+    Map<String, String> brandStatus;
+
     // Video
     Map<String, String> videoCategoryType;
     Map<String, String> videoMaskType;

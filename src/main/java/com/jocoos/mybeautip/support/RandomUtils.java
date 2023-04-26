@@ -44,4 +44,8 @@ public class RandomUtils {
     public static String generateFilename() {
         return RandomStringUtils.randomAlphanumeric(FILENAME_ALPHABETIC_LENGTH).toLowerCase();
     }
+
+    public static String generateBrandCode() {
+        return String.format("B-%05d", getRandom(1, 99999));
+    }
 }

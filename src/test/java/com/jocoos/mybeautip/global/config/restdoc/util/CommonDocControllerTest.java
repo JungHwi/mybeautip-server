@@ -158,6 +158,11 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("ProcessPermission")),
                                 enumConvertFieldDescriptor((enumDocs.getProcessPermission()))
                         ),
+                        // Brand
+                        customResponseFields("custom-response", beneathPath("data.brand_status").withSubsectionId("brand_status"),
+                                attributes(key("title").value("BrandyStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getBrandStatus()))
+                        ),
                         // Video
                         customResponseFields("custom-response", beneathPath("data.video_category_type").withSubsectionId("video_category_type"),
                                 attributes(key("title").value("VideoCategoryType")),

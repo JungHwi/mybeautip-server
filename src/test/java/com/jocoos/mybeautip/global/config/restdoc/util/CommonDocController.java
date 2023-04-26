@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.global.config.restdoc.util;
 
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState;
+import com.jocoos.mybeautip.domain.brand.code.BrandStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.*;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
@@ -97,6 +98,9 @@ public class CommonDocController {
         Map<String, String> companyStatus = getDocs(CompanyStatus.values());
         Map<String, String> processPermission = getDocs(ProcessPermission.values());
 
+        // Brand
+        Map<String, String> brandStatus = getDocs(BrandStatus.values());
+
         // Video
         Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
         Map<String, String> videoMaskType = getDocs(VideoMaskType.values());
@@ -190,6 +194,8 @@ public class CommonDocController {
                 // Company
                         .companyStatus(companyStatus)
                         .processPermission(processPermission)
+                // Brand
+                        .brandStatus(brandStatus)
                 // Video
                         .videoCategoryType(videoCategoryType)
                         .videoMaskType(videoMaskType)
