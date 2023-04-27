@@ -9,7 +9,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum SearchField {
     TITLE("title"),
-    COMMENT("comment");
+    COMMENT("comment"),
+    NAME("name"),
+    CODE("code");
 
     private final String fieldName;
 

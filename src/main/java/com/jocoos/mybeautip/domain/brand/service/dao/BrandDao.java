@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.brand.service.dao;
 
+import com.jocoos.mybeautip.domain.brand.dto.BrandSearchRequest;
 import com.jocoos.mybeautip.domain.brand.dto.CreateBrandRequest;
 import com.jocoos.mybeautip.domain.brand.persistence.domain.Brand;
 import com.jocoos.mybeautip.domain.brand.persistence.repository.BrandRepository;
@@ -7,6 +8,7 @@ import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,11 @@ public class BrandDao {
         Brand brand = new Brand(request, company);
 
         return repository.save(brand);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Brand> search(BrandSearchRequest request) {
+        return repository.search(request);
     }
 
     private String generateCode() {

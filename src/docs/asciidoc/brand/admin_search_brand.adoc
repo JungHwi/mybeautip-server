@@ -1,0 +1,3 @@
+== Admin Search Brand API
+
+operation::admin_search_brand[snippets='http-request,request-parameters,http-response,response-fields']

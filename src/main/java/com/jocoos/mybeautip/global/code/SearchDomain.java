@@ -5,8 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Set;
 
-import static com.jocoos.mybeautip.global.code.SearchField.COMMENT;
-import static com.jocoos.mybeautip.global.code.SearchField.TITLE;
+import static com.jocoos.mybeautip.global.code.SearchField.*;
 
 @Getter
 @RequiredArgsConstructor
@@ -14,7 +13,8 @@ public enum SearchDomain {
 
     VIDEO(Set.of(TITLE), Set.of(COMMENT)),
     BROADCAST(Set.of(TITLE), Set.of()),
-    VOD(Set.of(TITLE), Set.of())
+    VOD(Set.of(TITLE), Set.of()),
+    BRAND(Set.of(NAME, CODE), Set.of())
     ;
 
     private final Set<SearchField> innerFields;
