@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.domain.company.service.dao;
 
+import com.jocoos.mybeautip.domain.brand.service.dao.BrandDao;
+import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
 import com.jocoos.mybeautip.domain.company.dto.CompanySearchRequest;
 import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest;
 import com.jocoos.mybeautip.domain.company.dto.EditCompanyRequest;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CompanyDao {
 
+    private final BrandDao brandDao;
     private final CompanyRepository repository;
 
     @Transactional
@@ -37,7 +40,13 @@ public class CompanyDao {
     @Transactional
     public Company edit(long companyId, EditCompanyRequest request) {
         Company company = get(companyId);
-
+        disableBrand(company, request.status());
         return repository.save(company.edit(request));
+    }
+
+    private void disableBrand(Company company, CompanyStatus status) {
+        if (company.getStatus() == CompanyStatus.ACTIVE && status == CompanyStatus.INACTIVE) {
+            brandDao.disable(company);
+        }
     }
 }

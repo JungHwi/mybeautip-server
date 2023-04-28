@@ -1,0 +1,3 @@
+== Admin Delete Brand API
+
+operation::admin_delete_brand[snippets='http-request,path-parameters']

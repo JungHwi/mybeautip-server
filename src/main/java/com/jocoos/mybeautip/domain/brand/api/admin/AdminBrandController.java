@@ -7,6 +7,8 @@ import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -50,5 +52,13 @@ public class AdminBrandController {
     public BrandResponse edit(@PathVariable long brandId,
                               @RequestBody EditBrandRequest request) {
         return service.edit(brandId, request);
+    }
+
+    @DeleteMapping("/{brandId}")
+    public ResponseEntity delete(@PathVariable long brandId) {
+
+        service.delete(brandId);
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

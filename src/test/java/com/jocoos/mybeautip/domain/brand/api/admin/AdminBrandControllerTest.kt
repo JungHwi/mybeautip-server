@@ -204,6 +204,30 @@ class AdminBrandControllerTest(
         )
     }
 
+    @Test
+    fun delete() {
+        val company = saveCompany();
+        val brand = saveBrand(company);
+
+        val result: ResultActions = mockMvc
+            .perform(
+                delete("/admin/brand/{brandId}", brand.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNoContent)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_delete_brand",
+                RequestDocumentation.pathParameters(
+                    parameterWithName("brandId").description("브랜드 ID")
+                )
+            )
+        )
+    }
+
     fun saveCompany(): Company {
         return companyRepository.save(makeCompany())
     }

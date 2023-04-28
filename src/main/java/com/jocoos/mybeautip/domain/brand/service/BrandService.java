@@ -55,6 +55,11 @@ public class BrandService {
         return converter.converts(brand);
     }
 
+    @Transactional
+    public void delete(long brandId) {
+        dao.delete(brandId);
+    }
+
     private void validCreate(Company company) {
         if (company.getStatus() != CompanyStatus.ACTIVE) {
             throw new BadRequestException(COMPANY_NOT_AVAILABLE);
