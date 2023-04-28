@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.brand.persistence.domain.Brand;
 import com.jocoos.mybeautip.domain.brand.persistence.repository.BrandRepository;
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,12 @@ public class BrandDao {
     @Transactional(readOnly = true)
     public Page<Brand> search(BrandSearchRequest request) {
         return repository.search(request);
+    }
+
+    @Transactional(readOnly = true)
+    public Brand get(long brandId) {
+        return repository.findById(brandId)
+                .orElseThrow(() -> new NotFoundException("Brand not found. id - " + brandId));
     }
 
     private String generateCode() {

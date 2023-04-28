@@ -46,6 +46,12 @@ public class BrandService {
         return new PageResponse<>(brandPage.getTotalElements(), contents);
     }
 
+    @Transactional(readOnly = true)
+    public BrandResponse get(long brandId) {
+        Brand brand = dao.get(brandId);
+        return converter.converts(brand);
+    }
+
     private void validCreate(Company company) {
         if (company.getStatus() != CompanyStatus.ACTIVE) {
             throw new BadRequestException(COMPANY_NOT_AVAILABLE);

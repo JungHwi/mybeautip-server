@@ -21,6 +21,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
+import org.springframework.restdocs.request.RequestDocumentation
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import org.springframework.test.web.servlet.ResultActions
@@ -118,9 +119,43 @@ class AdminBrandControllerTest(
                 )
             )
         )
-
     }
 
+    @Test
+    fun get() {
+        val company = saveCompany();
+        val brand = saveBrand(company);
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/brand/{brandId}", brand.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_get_brand",
+                RequestDocumentation.pathParameters(
+                    parameterWithName("brandId").description("브랜드 ID")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("브랜드 ID"),
+                    fieldWithPath("code").type(STRING).description("브랜드 코드"),
+                    fieldWithPath("name").type(STRING).description("브랜드명"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(BRAND_STATUS)),
+                    fieldWithPath("description").type(STRING).description("브랜드 설명").optional(),
+                    fieldWithPath("company").type(OBJECT).description("공급사 정보"),
+                    fieldWithPath("company.id").type(NUMBER).description("공급사 아이디"),
+                    fieldWithPath("company.name").type(STRING).description("공급사명"),
+                    fieldWithPath("company.status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
+                )
+            )
+        )
+    }
 
     fun saveCompany(): Company {
         return companyRepository.save(makeCompany())

@@ -25,13 +25,13 @@ public class AdminBrandController {
     }
 
     @GetMapping
-    public PageResponse<BrandListResponse> get(@RequestParam(required = false) String searchField,
-                                               @RequestParam(required = false) String keyword,
-                                               @RequestParam(required = false) BrandStatus status,
-                                               @RequestParam(required = false, defaultValue = "id") String sort,
-                                               @RequestParam(required = false, defaultValue = "DESC") Sort.Direction order,
-                                               @RequestParam(required = false, defaultValue = "1") int page,
-                                               @RequestParam(required = false, defaultValue = "10") int size) {
+    public PageResponse<BrandListResponse> search(@RequestParam(required = false) String searchField,
+                                                  @RequestParam(required = false) String keyword,
+                                                  @RequestParam(required = false) BrandStatus status,
+                                                  @RequestParam(required = false, defaultValue = "id") String sort,
+                                                  @RequestParam(required = false, defaultValue = "DESC") Sort.Direction order,
+                                                  @RequestParam(required = false, defaultValue = "1") int page,
+                                                  @RequestParam(required = false, defaultValue = "10") int size) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size, order, sort);
         BrandSearchRequest request = BrandSearchRequest.builder()
@@ -42,5 +42,10 @@ public class AdminBrandController {
                 .build();
 
         return service.search(request);
+    }
+
+    @GetMapping("/{brandId}")
+    public BrandResponse get(@PathVariable long brandId) {
+        return service.get(brandId);
     }
 }
