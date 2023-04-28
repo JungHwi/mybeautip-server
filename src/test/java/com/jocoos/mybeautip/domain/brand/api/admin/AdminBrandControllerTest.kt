@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.brand.api.admin
 
 import com.jocoos.mybeautip.domain.brand.code.BrandStatus
 import com.jocoos.mybeautip.domain.brand.dto.CreateBrandRequest
+import com.jocoos.mybeautip.domain.brand.dto.EditBrandRequest
 import com.jocoos.mybeautip.domain.brand.persistence.domain.Brand
 import com.jocoos.mybeautip.domain.brand.persistence.repository.BrandRepository
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company
@@ -17,8 +18,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation
@@ -141,6 +141,53 @@ class AdminBrandControllerTest(
                 "admin_get_brand",
                 RequestDocumentation.pathParameters(
                     parameterWithName("brandId").description("브랜드 ID")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("브랜드 ID"),
+                    fieldWithPath("code").type(STRING).description("브랜드 코드"),
+                    fieldWithPath("name").type(STRING).description("브랜드명"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(BRAND_STATUS)),
+                    fieldWithPath("description").type(STRING).description("브랜드 설명").optional(),
+                    fieldWithPath("company").type(OBJECT).description("공급사 정보"),
+                    fieldWithPath("company.id").type(NUMBER).description("공급사 아이디"),
+                    fieldWithPath("company.name").type(STRING).description("공급사명"),
+                    fieldWithPath("company.status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun edit() {
+        val company = saveCompany();
+        val brand = saveBrand(company);
+
+        val request = EditBrandRequest.builder()
+            .name("수정된 브랜드")
+            .status(BrandStatus.ACTIVE)
+            .description("수정된 브랜드 설명")
+            .build()
+
+        val result: ResultActions = mockMvc
+            .perform(
+                put("/admin/brand/{brandId}", brand.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_edit_brand",
+                RequestDocumentation.pathParameters(
+                    parameterWithName("brandId").description("브랜드 ID")
+                ),
+                requestFields(
+                    fieldWithPath("name").type(STRING).description("브랜드명"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(BRAND_STATUS)),
+                    fieldWithPath("description").type(STRING).description("브랜드 설명").optional(),
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("브랜드 ID"),

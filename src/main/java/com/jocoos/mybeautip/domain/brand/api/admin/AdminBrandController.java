@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.domain.brand.api.admin;
 
 import com.jocoos.mybeautip.domain.brand.code.BrandStatus;
-import com.jocoos.mybeautip.domain.brand.dto.BrandListResponse;
-import com.jocoos.mybeautip.domain.brand.dto.BrandResponse;
-import com.jocoos.mybeautip.domain.brand.dto.BrandSearchRequest;
-import com.jocoos.mybeautip.domain.brand.dto.CreateBrandRequest;
+import com.jocoos.mybeautip.domain.brand.dto.*;
 import com.jocoos.mybeautip.domain.brand.service.BrandService;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +44,11 @@ public class AdminBrandController {
     @GetMapping("/{brandId}")
     public BrandResponse get(@PathVariable long brandId) {
         return service.get(brandId);
+    }
+
+    @PutMapping("/{brandId}")
+    public BrandResponse edit(@PathVariable long brandId,
+                              @RequestBody EditBrandRequest request) {
+        return service.edit(brandId, request);
     }
 }

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.brand.service.dao;
 
 import com.jocoos.mybeautip.domain.brand.dto.BrandSearchRequest;
 import com.jocoos.mybeautip.domain.brand.dto.CreateBrandRequest;
+import com.jocoos.mybeautip.domain.brand.dto.EditBrandRequest;
 import com.jocoos.mybeautip.domain.brand.persistence.domain.Brand;
 import com.jocoos.mybeautip.domain.brand.persistence.repository.BrandRepository;
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
@@ -36,6 +37,12 @@ public class BrandDao {
     public Brand get(long brandId) {
         return repository.findById(brandId)
                 .orElseThrow(() -> new NotFoundException("Brand not found. id - " + brandId));
+    }
+
+    @Transactional
+    public Brand edit(long brandId, EditBrandRequest request) {
+        Brand brand = this.get(brandId);
+        return brand.edit(request);
     }
 
     private String generateCode() {

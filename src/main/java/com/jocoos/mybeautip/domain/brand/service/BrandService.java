@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.domain.brand.service;
 
 import com.jocoos.mybeautip.domain.brand.converter.BrandConverter;
-import com.jocoos.mybeautip.domain.brand.dto.BrandListResponse;
-import com.jocoos.mybeautip.domain.brand.dto.BrandResponse;
-import com.jocoos.mybeautip.domain.brand.dto.BrandSearchRequest;
-import com.jocoos.mybeautip.domain.brand.dto.CreateBrandRequest;
+import com.jocoos.mybeautip.domain.brand.dto.*;
 import com.jocoos.mybeautip.domain.brand.persistence.domain.Brand;
 import com.jocoos.mybeautip.domain.brand.service.dao.BrandDao;
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
@@ -49,6 +46,12 @@ public class BrandService {
     @Transactional(readOnly = true)
     public BrandResponse get(long brandId) {
         Brand brand = dao.get(brandId);
+        return converter.converts(brand);
+    }
+
+    @Transactional
+    public BrandResponse edit(long brandId, EditBrandRequest request) {
+        Brand brand = dao.edit(brandId, request);
         return converter.converts(brand);
     }
 

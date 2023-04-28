@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.brand.persistence.domain;
 
 import com.jocoos.mybeautip.domain.brand.code.BrandStatus;
 import com.jocoos.mybeautip.domain.brand.dto.CreateBrandRequest;
+import com.jocoos.mybeautip.domain.brand.dto.EditBrandRequest;
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
 import com.jocoos.mybeautip.global.config.jpa.CreatedAtBaseEntity;
 import lombok.Getter;
@@ -42,6 +43,14 @@ public class Brand extends CreatedAtBaseEntity {
         this.name = request.getName();
         this.description = request.getDescription();
         this.code = request.getCode();
+    }
+
+    public Brand edit(EditBrandRequest request) {
+        this.status = request.status();
+        this.name = request.name();
+        this.description = request.description();
+
+        return this;
     }
 
 }
