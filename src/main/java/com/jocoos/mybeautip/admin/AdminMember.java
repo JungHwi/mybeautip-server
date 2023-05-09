@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.admin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.legacy.store.LegacyStore;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.store.Store;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,7 +31,7 @@ public class AdminMember {
 
     @ManyToOne
     @JoinColumn(name = "store_id")
-    private Store store;
+    private LegacyStore legacyStore;
 
     @Column(nullable = false)
     @CreatedDate

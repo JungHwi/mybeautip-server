@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.goods;
 
+import com.jocoos.mybeautip.legacy.store.LegacyStore;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.store.Store;
-import com.jocoos.mybeautip.store.StoreRepository;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -31,7 +31,7 @@ public class GoodsService {
     private final GoodsRepository goodsRepository;
     private final VideoGoodsRepository videoGoodsRepository;
     private final GoodsLikeRepository goodsLikeRepository;
-    private final StoreRepository storeRepository;
+    private final LegacyStoreRepository legacyStoreRepository;
     private final DeliveryChargeOptionRepository deliveryChargeOptionRepository;
     @Value("${mybeautip.store.image-path.domain}")
     private String storeImagePrefix;
@@ -51,7 +51,7 @@ public class GoodsService {
                         GoodsRepository goodsRepository,
                         VideoGoodsRepository videoGoodsRepository,
                         GoodsLikeRepository goodsLikeRepository,
-                        StoreRepository storeRepository,
+                        LegacyStoreRepository legacyStoreRepository,
                         DeliveryChargeOptionRepository deliveryChargeOptionRepository) {
         this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
@@ -59,7 +59,7 @@ public class GoodsService {
         this.goodsRepository = goodsRepository;
         this.videoGoodsRepository = videoGoodsRepository;
         this.goodsLikeRepository = goodsLikeRepository;
-        this.storeRepository = storeRepository;
+        this.legacyStoreRepository = legacyStoreRepository;
         this.deliveryChargeOptionRepository = deliveryChargeOptionRepository;
     }
 
@@ -243,7 +243,7 @@ public class GoodsService {
         String asInfo = "";
         String companyInfo = messageService.getGoodsCompanyMessage();
 
-        Optional<Store> optional = storeRepository.findById(goods.getScmNo());
+        Optional<LegacyStore> optional = legacyStoreRepository.findById(goods.getScmNo());
         if (optional.isPresent()) {
             deliveryInfo = optional.get().getDeliveryInfo();
             refundInfo = optional.get().getCancelInfo();

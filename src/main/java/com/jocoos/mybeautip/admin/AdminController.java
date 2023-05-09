@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -17,15 +18,12 @@ import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.recommendation.*;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;
-import com.jocoos.mybeautip.store.StoreRepository;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.LegacyVideoService;
-import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -68,7 +66,7 @@ public class AdminController {
     private final MotdRecommendationBaseRepository motdRecommendationBaseRepository;
     private final KeywordRecommendationRepository keywordRecommendationRepository;
     private final ReportRepository reportRepository;
-    private final StoreRepository storeRepository;
+    private final LegacyStoreRepository legacyStoreRepository;
     private final VideoRepository videoRepository;
     private final VideoReportRepository videoReportRepository;
     private final ScheduleRepository scheduleRepository;
@@ -331,7 +329,7 @@ public class AdminController {
         Page<GoodsDetailInfo> details = goods.map(g -> {
             GoodsDetailInfo info = new GoodsDetailInfo(g);
             goodsRecommendationRepository.findByGoodsNo(g.getGoodsNo()).ifPresent(r -> info.setRecommendation(r));
-            storeRepository.findById(g.getScmNo()).ifPresent(s -> info.setStore(s));
+            legacyStoreRepository.findById(g.getScmNo()).ifPresent(s -> info.setStore(s));
             return info;
         });
 

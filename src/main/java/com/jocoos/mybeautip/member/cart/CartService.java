@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.legacy.store.LegacyStore;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CartController;
-import com.jocoos.mybeautip.store.Store;
-import com.jocoos.mybeautip.store.StoreRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +38,7 @@ public class CartService {
     private final GoodsRepository goodsRepository;
     private final GoodsOptionRepository goodsOptionRepository;
     private final CartRepository cartRepository;
-    private final StoreRepository storeRepository;
+    private final LegacyStoreRepository legacyStoreRepository;
     private final DeliveryChargeRepository deliveryChargeRepository;
     private final DeliveryChargeDetailRepository deliveryChargeDetailRepository;
     private final DeliveryChargeOptionRepository deliveryChargeOptionRepository;
@@ -53,7 +53,7 @@ public class CartService {
                        GoodsOptionRepository goodsOptionRepository,
                        DeliveryChargeOptionRepository deliveryChargeOptionRepository,
                        CartRepository cartRepository,
-                       StoreRepository storeRepository,
+                       LegacyStoreRepository legacyStoreRepository,
                        DeliveryChargeRepository deliveryChargeRepository,
                        DeliveryChargeDetailRepository deliveryChargeDetailRepository) {
         this.messageService = messageService;
@@ -62,7 +62,7 @@ public class CartService {
         this.goodsOptionRepository = goodsOptionRepository;
         this.deliveryChargeOptionRepository = deliveryChargeOptionRepository;
         this.cartRepository = cartRepository;
-        this.storeRepository = storeRepository;
+        this.legacyStoreRepository = legacyStoreRepository;
         this.deliveryChargeRepository = deliveryChargeRepository;
         this.deliveryChargeDetailRepository = deliveryChargeDetailRepository;
     }
@@ -131,7 +131,7 @@ public class CartService {
 
         List<CartStore> stores = new ArrayList<>();
         for (Integer storeId : storeMap.keySet()) {
-            stores.add(new CartStore(storeId, storeRepository.getById(storeId).getName(), storeMap.get(storeId)));
+            stores.add(new CartStore(storeId, legacyStoreRepository.getById(storeId).getName(), storeMap.get(storeId)));
         }
 
         // Calculate count, price and shipping
@@ -334,10 +334,10 @@ public class CartService {
             throw new NotFoundException(messageService.getMessage(OPTION_NOT_FOUND, lang));
         }
 
-        Store store = storeRepository.findById(goods.getScmNo())
+        LegacyStore legacyStore = legacyStoreRepository.findById(goods.getScmNo())
                 .orElseThrow(() -> new NotFoundException(messageService.getMessage(STORE_NOT_FOUND, lang)));
 
-        return new Cart(goods, option, store, quantity);
+        return new Cart(goods, option, legacyStore, quantity);
     }
 
     private void checkQuantityValidity(Goods goods, GoodsOption option, int quantity, String lang) {

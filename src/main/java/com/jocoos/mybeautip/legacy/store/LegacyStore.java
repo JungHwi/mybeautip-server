@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.store;
+package com.jocoos.mybeautip.legacy.store;
 
 import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 import lombok.Data;
@@ -15,8 +15,8 @@ import java.util.Date;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "stores")
-public class Store extends ModifiedDateAuditable {
+@Table(name = "legacy_stores")
+public class LegacyStore extends ModifiedDateAuditable {
     @Id
     private Integer id;
 
@@ -56,7 +56,7 @@ public class Store extends ModifiedDateAuditable {
     @Column
     private Date deletedAt;
 
-    public Store(Integer scmNo) {
+    public LegacyStore(Integer scmNo) {
         this.setId(scmNo);
     }
 }

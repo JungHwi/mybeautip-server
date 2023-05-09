@@ -8,6 +8,9 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreController;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreLike;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreLikeRepository;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.following.Following;
@@ -18,8 +21,6 @@ import com.jocoos.mybeautip.member.revenue.*;
 import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.search.KeywordService;
-import com.jocoos.mybeautip.store.StoreLike;
-import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.scrap.LegacyVideoScrapService;
 import com.jocoos.mybeautip.video.scrap.VideoScrap;
@@ -71,7 +72,7 @@ public class LegacyMemberController {
     private final FollowingRepository followingRepository;
     //    private final PostLikeRepository postLikeRepository;
     private final GoodsLikeRepository goodsLikeRepository;
-    private final StoreLikeRepository storeLikeRepository;
+    private final LegacyStoreLikeRepository legacyStoreLikeRepository;
     private final VideoLikeRepository videoLikeRepository;
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
@@ -103,7 +104,7 @@ public class LegacyMemberController {
                                   FollowingRepository followingRepository,
 //                                  PostLikeRepository postLikeRepository,
                                   GoodsLikeRepository goodsLikeRepository,
-                                  StoreLikeRepository storeLikeRepository,
+                                  LegacyStoreLikeRepository legacyStoreLikeRepository,
                                   VideoLikeRepository videoLikeRepository,
                                   CommentRepository commentRepository,
                                   CommentLikeRepository commentLikeRepository,
@@ -125,7 +126,7 @@ public class LegacyMemberController {
         this.followingRepository = followingRepository;
 //        this.postLikeRepository = postLikeRepository;
         this.goodsLikeRepository = goodsLikeRepository;
-        this.storeLikeRepository = storeLikeRepository;
+        this.legacyStoreLikeRepository = legacyStoreLikeRepository;
         this.videoLikeRepository = videoLikeRepository;
         this.commentRepository = commentRepository;
         this.commentLikeRepository = commentLikeRepository;
@@ -273,7 +274,7 @@ public class LegacyMemberController {
     public LikeCountResponse getMyLikesCount() {
         LikeCountResponse response = new LikeCountResponse();
         response.setGoods(goodsLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
-        response.setStore(storeLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
+        response.setStore(legacyStoreLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
 //        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(legacyMemberService.currentMemberId()));
         response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(legacyMemberService.currentMemberId(), LIKE));
         return response;
@@ -285,7 +286,7 @@ public class LegacyMemberController {
         memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
         LikeCountResponse response = new LikeCountResponse();
         response.setGoods(goodsLikeRepository.countByCreatedById(id));
-        response.setStore(storeLikeRepository.countByCreatedById(id));
+        response.setStore(legacyStoreLikeRepository.countByCreatedById(id));
 //        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(id));
         response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(id, LIKE));
         return response;
@@ -655,22 +656,22 @@ public class LegacyMemberController {
 
     private CursorResponse createStoreLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
         PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
-        Slice<StoreLike> storeLikes;
-        List<StoreController.StoreInfo> result = new ArrayList<>();
+        Slice<LegacyStoreLike> storeLikes;
+        List<LegacyStoreController.StoreInfo> result = new ArrayList<>();
 
         if (cursor != null) {
-            storeLikes = storeLikeRepository.findByCreatedAtBeforeAndCreatedById(new Date(cursor), memberId, pageable);
+            storeLikes = legacyStoreLikeRepository.findByCreatedAtBeforeAndCreatedById(new Date(cursor), memberId, pageable);
         } else {
-            storeLikes = storeLikeRepository.findByCreatedById(memberId, pageable);
+            storeLikes = legacyStoreLikeRepository.findByCreatedById(memberId, pageable);
         }
 
         Long likeId = null;
         Long me = legacyMemberService.currentMemberId();
-        for (StoreLike like : storeLikes) {
+        for (LegacyStoreLike like : storeLikes) {
             if (me != null) {
                 likeId = me.equals(like.getCreatedBy().getId()) ? like.getId() : null;
             }
-            result.add(new StoreController.StoreInfo(like.getStore(), likeId));
+            result.add(new LegacyStoreController.StoreInfo(like.getLegacyStore(), likeId));
         }
 
         String nextCursor = null;

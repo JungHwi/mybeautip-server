@@ -2,9 +2,9 @@ package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.legacy.store.LegacyStore;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreController;
 import com.jocoos.mybeautip.recommendation.GoodsRecommendation;
-import com.jocoos.mybeautip.restapi.StoreController;
-import com.jocoos.mybeautip.store.Store;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.beans.BeanUtils;
 @Data
 public class GoodsDetailInfo extends GoodsInfo {
     private GoodsRecommendation recommendation;
-    private StoreController.StoreInfo store;
+    private LegacyStoreController.StoreInfo store;
 
     public GoodsDetailInfo(Goods goods) {
         BeanUtils.copyProperties(goods, this);
@@ -26,7 +26,7 @@ public class GoodsDetailInfo extends GoodsInfo {
         this.recommendation = recommendation;
     }
 
-    public void setStore(Store store) {
-        this.store = new StoreController.StoreInfo(store, null);
+    public void setStore(LegacyStore legacyStore) {
+        this.store = new LegacyStoreController.StoreInfo(legacyStore, null);
     }
 }

@@ -1,3 +1,6 @@
+rename table `stores` to `legacy_stores`;
+rename table `store_likes` to `legacy_store_likes`;
+
 create table company
 (
     id                  bigint auto_increment primary key comment '공급사 아이디',

@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.store;
+package com.jocoos.mybeautip.legacy.store;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import lombok.Data;
@@ -11,17 +11,17 @@ import javax.persistence.*;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "store_likes")
-public class StoreLike extends MemberAuditable {
+@Table(name = "legacy_store_likes")
+public class LegacyStoreLike extends MemberAuditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "store_id")
-    private Store store;
+    private LegacyStore legacyStore;
 
-    public StoreLike(Store store) {
-        this.store = store;
+    public LegacyStoreLike(LegacyStore legacyStore) {
+        this.legacyStore = legacyStore;
     }
 }

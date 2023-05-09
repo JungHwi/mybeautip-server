@@ -72,8 +72,8 @@ public class LegacyAdminMemberController {
                 AdminMember adminMember = adminMemberRepository.findByMemberId(memberRoleInfo.getId())
                         .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND, "invalid member id"));
 
-                if (adminMember.getStore() != null) {
-                    memberRoleInfo.setStoreId(adminMember.getStore().getId());
+                if (adminMember.getLegacyStore() != null) {
+                    memberRoleInfo.setStoreId(adminMember.getLegacyStore().getId());
                 }
                 break;
             }

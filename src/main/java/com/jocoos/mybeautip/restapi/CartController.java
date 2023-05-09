@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.legacy.store.LegacyStore;
+import com.jocoos.mybeautip.legacy.store.LegacyStoreRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.address.Address;
@@ -11,8 +13,6 @@ import com.jocoos.mybeautip.member.cart.Cart;
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.cart.CartService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.store.Store;
-import com.jocoos.mybeautip.store.StoreRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,7 +47,7 @@ public class CartController {
     private final CartRepository cartRepository;
     private final GoodsRepository goodsRepository;
     private final GoodsOptionRepository goodsOptionRepository;
-    private final StoreRepository storeRepository;
+    private final LegacyStoreRepository legacyStoreRepository;
     private final AddressRepository addressRepository;
 
     public CartController(LegacyMemberService legacyMemberService,
@@ -56,7 +56,7 @@ public class CartController {
                           CartRepository cartRepository,
                           GoodsRepository goodsRepository,
                           GoodsOptionRepository goodsOptionRepository,
-                          StoreRepository storeRepository,
+                          LegacyStoreRepository legacyStoreRepository,
                           AddressRepository addressRepository) {
         this.legacyMemberService = legacyMemberService;
         this.cartService = cartService;
@@ -64,7 +64,7 @@ public class CartController {
         this.cartRepository = cartRepository;
         this.goodsRepository = goodsRepository;
         this.goodsOptionRepository = goodsOptionRepository;
-        this.storeRepository = storeRepository;
+        this.legacyStoreRepository = legacyStoreRepository;
         this.addressRepository = addressRepository;
     }
 
@@ -188,10 +188,10 @@ public class CartController {
             throw new NotFoundException(messageService.getMessage(OPTION_NOT_FOUND, lang));
         }
 
-        Store store = storeRepository.findById(goods.getScmNo())
+        LegacyStore legacyStore = legacyStoreRepository.findById(goods.getScmNo())
                 .orElseThrow(() -> new NotFoundException(messageService.getMessage(STORE_NOT_FOUND, lang)));
 
-        return new Cart(goods, option, store, quantity);
+        return new Cart(goods, option, legacyStore, quantity);
     }
 
     @Data
