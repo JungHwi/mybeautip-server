@@ -15,6 +15,7 @@ public class DocumentLinkGenerator {
     @RequiredArgsConstructor
     public enum DocUrl {
         BOOLEAN_TYPE("boolean_type", "Boolean"),
+        COUNTRY_CODE("country_code", "국가코드"),
         SYSTEM_OPTION_TYPE("system_option_type", "시스템 옵션"),
         MEMBER_STATUS("member_status", "회원 상태"),
         INFLUENCER_STATUS("influencer_status", "인플루언서 상태"),
@@ -29,6 +30,7 @@ public class DocumentLinkGenerator {
         COMMUNITY_CATEGORY_TYPE("community_category_type", "커뮤니티 카테고리 구분"),
         COMPANY_STATUS("company_status", "회사 상태"),
         BRAND_STATUS("brand_status", "브랜드 상태"),
+        STORE_CATEGORY_STATUS("store_category_status", "스토어 카테고리 상태"),
         PROCESS_PERMISSION("process_permission", "승인절차 권한"),
         VIDEO_CATEGORY_TYPE("video_category_type", "비디오 카테고리 구분"),
         VIDEO_MASK_TYPE("video_mask_type", "비디오 마스크 구분"),

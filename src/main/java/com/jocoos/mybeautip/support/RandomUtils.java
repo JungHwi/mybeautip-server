@@ -48,4 +48,8 @@ public class RandomUtils {
     public static String generateBrandCode() {
         return String.format("B-%05d", getRandom(1, 99999));
     }
+
+    public static String generateStoreCategoryCode() {
+        return String.format("C-01-%03d", getRandom(1, 999));
+    }
 }

@@ -30,6 +30,7 @@ tools/*.zip
 /src/main/resources/static/docs/community/
 /src/main/resources/static/docs/company/
 /src/main/resources/static/docs/brand/
+/src/main/resources/static/docs/store/
 /src/main/resources/static/docs/event/
 /src/main/resources/static/docs/home/
 /src/main/resources/static/docs/member/

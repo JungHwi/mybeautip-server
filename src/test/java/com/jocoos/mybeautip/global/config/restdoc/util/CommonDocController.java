@@ -29,6 +29,7 @@ import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
 import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeLinkType;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
+import com.jocoos.mybeautip.domain.store.code.StoreCategoryStatus;
 import com.jocoos.mybeautip.domain.system.code.SystemOptionType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
@@ -64,6 +65,7 @@ public class CommonDocController {
         Map<String, String> fileOperationType = getDocs(FileOperationType.values());
         Map<String, String> fileType = getDocs(FileType.values());
         Map<String, String> sortField = getDocs(SortField.values());
+        Map<String, String> countryCode = getDocs(CountryCode.values());
 
         // System
         Map<String, String> systemOptionType = getDocs(SystemOptionType.values());
@@ -100,6 +102,11 @@ public class CommonDocController {
 
         // Brand
         Map<String, String> brandStatus = getDocs(BrandStatus.values());
+
+        // Product
+
+        // Store
+        Map<String, String> storeCategoryStatus = getDocs(StoreCategoryStatus.values());
 
         // Video
         Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
@@ -167,6 +174,7 @@ public class CommonDocController {
                         .fileOperationType(fileOperationType)
                         .fileType(fileType)
                         .sortField(sortField)
+                        .countryCode(countryCode)
                 // System
                         .systemOptionType(systemOptionType)
                 // Member
@@ -196,6 +204,9 @@ public class CommonDocController {
                         .processPermission(processPermission)
                 // Brand
                         .brandStatus(brandStatus)
+                // Product
+                // Store
+                        .storeCategoryStatus(storeCategoryStatus)
                 // Video
                         .videoCategoryType(videoCategoryType)
                         .videoMaskType(videoMaskType)

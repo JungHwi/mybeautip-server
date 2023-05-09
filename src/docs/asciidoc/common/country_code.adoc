@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[country_code]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-country_code.adoc[]

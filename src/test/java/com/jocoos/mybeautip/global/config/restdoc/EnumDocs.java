@@ -20,6 +20,7 @@ public class EnumDocs {
     Map<String, String> fileOperationType;
     Map<String, String> fileType;
     Map<String, String> sortField;
+    Map<String, String> countryCode;
 
     // System
     Map<String, String> systemOptionType;
@@ -56,6 +57,11 @@ public class EnumDocs {
 
     // Brand
     Map<String, String> brandStatus;
+
+    // Product
+
+    // Store
+    Map<String, String> storeCategoryStatus;
 
     // Video
     Map<String, String> videoCategoryType;

@@ -60,6 +60,23 @@ create table brand
     created_at      datetime not null comment '생성 일시'
 ) charset = utf8mb4 comment '브랜드 정보';
 
+create table store_category
+(
+    id          bigint auto_increment primary key comment '스토어 카테고리 아이디',
+    code        char(8) not null comment '카테고리 코드',
+    sort        int not null comment '순서',
+    status      varchar(20) not null comment '카테고리 상태',
+    name        varchar(30) not null comment '대표 카테고리명',
+    created_at  datetime not null comment '생성 일시'
+) charset = utf8mb4 comment '스토어 카테고리 정보';
+
+create table store_category_detail
+(
+    id          bigint auto_increment primary key comment '스토어 카테고리 상세 정보 아이디',
+    store_id    bigint not null comment '스토어 카테고리 아이디',
+    country      char(2) not null comment '국가 코드',
+    name        varchar(30) not null comment '국가별 카테고리명'
+) charset = utf8mb4 comment '스토어 카테고리 상세 정보';
 
 
 # delete from flyway_schema_history where version = '0158';
@@ -68,3 +85,5 @@ create table brand
 # drop table company_claim;
 # drop table company_permission;
 # drop table brand;
+# drop table store_category;
+# drop table store_category_detail;

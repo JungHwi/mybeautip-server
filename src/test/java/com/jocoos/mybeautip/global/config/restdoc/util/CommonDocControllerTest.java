@@ -68,6 +68,10 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("SortField")),
                                 enumConvertFieldDescriptor((enumDocs.getSortField()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.country_code").withSubsectionId("country_code"),
+                                attributes(key("title").value("CountryCode")),
+                                enumConvertFieldDescriptor((enumDocs.getCountryCode()))
+                        ),
                         // System
                         customResponseFields("custom-response", beneathPath("data.system_option_type").withSubsectionId("system_option_type"),
                                 attributes(key("title").value("SystemOptionType")),
@@ -162,6 +166,12 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                         customResponseFields("custom-response", beneathPath("data.brand_status").withSubsectionId("brand_status"),
                                 attributes(key("title").value("BrandyStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getBrandStatus()))
+                        ),
+                        // Product
+                        // Store
+                        customResponseFields("custom-response", beneathPath("data.store_category_status").withSubsectionId("store_category_status"),
+                                attributes(key("title").value("StoreCategoryStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getStoreCategoryStatus()))
                         ),
                         // Video
                         customResponseFields("custom-response", beneathPath("data.video_category_type").withSubsectionId("video_category_type"),
