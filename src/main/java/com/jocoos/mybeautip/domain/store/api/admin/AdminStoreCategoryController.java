@@ -42,4 +42,9 @@ public class AdminStoreCategoryController {
 
         return new PageResponse(result) ;
     }
+
+    @GetMapping("/{categoryId}")
+    public StoreCategoryResponse get(@PathVariable long categoryId) {
+        return service.get(categoryId);
+    }
 }

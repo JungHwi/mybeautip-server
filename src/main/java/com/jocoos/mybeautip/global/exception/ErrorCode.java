@@ -118,14 +118,16 @@ public enum ErrorCode implements CodeValue {
     // THIRD PARTY
     S3_ERROR("S3 에러"),
 
-
     // Placard
     ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨"),
 
     // Broadcast
     ALREADY_SCHEDULED("이미 예약된 일정이 있음"),
     ALREADY_READY("이미 준비 중인 라이브가 있음"),
-    ALREADY_LIVE("이미 라이브중임");
+    ALREADY_LIVE("이미 라이브중임"),
+
+    // Store
+    STORE_CATEGORY_NOT_FOUND("스토어 카테고리 정보 없음");
 
     private final String description;
 

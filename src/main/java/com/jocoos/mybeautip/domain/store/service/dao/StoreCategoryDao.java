@@ -6,10 +6,13 @@ import com.jocoos.mybeautip.domain.store.dto.StoreCategoryListResponse;
 import com.jocoos.mybeautip.domain.store.persistence.domain.StoreCategory;
 import com.jocoos.mybeautip.domain.store.persistence.repository.StoreCategoryRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import static com.jocoos.mybeautip.global.exception.ErrorCode.STORE_CATEGORY_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
@@ -28,6 +31,11 @@ public class StoreCategoryDao {
 
     public Page<StoreCategoryListResponse> search(SearchStoreCategoryRequest request) {
         return repository.search(request);
+    }
+
+    public StoreCategory get(long categoryId) {
+        return repository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException(STORE_CATEGORY_NOT_FOUND, "Store category not found. id - " + categoryId));
     }
 
     private String generateCode() {

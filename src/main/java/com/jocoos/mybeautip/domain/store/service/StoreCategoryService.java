@@ -26,4 +26,9 @@ public class StoreCategoryService {
     public Page<StoreCategoryListResponse> search(SearchStoreCategoryRequest request) {
         return dao.search(request);
     }
+
+    public StoreCategoryResponse get(long categoryId) {
+        StoreCategory storeCategory = dao.get(categoryId);
+        return converter.converts(storeCategory);
+    }
 }

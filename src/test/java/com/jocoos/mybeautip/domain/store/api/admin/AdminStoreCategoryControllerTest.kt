@@ -19,6 +19,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
+import org.springframework.restdocs.request.RequestDocumentation
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import org.springframework.test.web.servlet.ResultActions
@@ -97,6 +98,39 @@ class AdminStoreCategoryControllerTest(
                     fieldWithPath("content.[].id").type(NUMBER).description("스토어 카테고리 ID"),
                     fieldWithPath("content.[].name").type(STRING).description("스토어 카테고리명"),
                     fieldWithPath("content.[].display_count").type(NUMBER).description("전시 상품수"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun get() {
+        val category = saveStoreCategory()
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/store/category/{categoryId}", category.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_get_store_category",
+                RequestDocumentation.pathParameters(
+                    parameterWithName("categoryId").description("스토어 카테고리 ID")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("스토어 대표 카테고리 ID"),
+                    fieldWithPath("code").type(STRING).description("스토어 대표 카테고리 코드"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(STORE_CATEGORY_STATUS)),
+                    fieldWithPath("name").type(STRING).description("스토어 대표 카테고리"),
+                    fieldWithPath("category_detail_list").type(ARRAY).description("카테고리 상세 정보(국가별)"),
+                    fieldWithPath("category_detail_list.[].country").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
                 )
             )
         )
