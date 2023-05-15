@@ -19,7 +19,7 @@ public class StoreCategoryDetail {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "store_id")
+    @JoinColumn(name = "category_id")
     private StoreCategory storeCategory;
 
     @Enumerated(EnumType.STRING)

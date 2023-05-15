@@ -8,4 +8,5 @@ import org.mapstruct.Mapper;
 public interface StoreCategoryConverter {
 
     StoreCategoryResponse converts(StoreCategory storeCategory);
+
 }
