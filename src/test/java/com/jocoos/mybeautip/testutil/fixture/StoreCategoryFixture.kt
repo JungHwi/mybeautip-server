@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.testutil.fixture
 
 import com.jocoos.mybeautip.domain.store.code.StoreCategoryStatus
 import com.jocoos.mybeautip.domain.store.dto.CreateStoreCategoryRequest
+import com.jocoos.mybeautip.domain.store.dto.DeleteCategoryRequest
 import com.jocoos.mybeautip.domain.store.dto.StoreCategoryDetailDto
 import com.jocoos.mybeautip.domain.store.persistence.domain.StoreCategory
 import com.jocoos.mybeautip.global.code.CountryCode
@@ -22,6 +23,14 @@ fun makeStoreCategoryRequest(
         .status(status)
         .name(name)
         .categoryDetailList(list)
+        .build()
+}
+
+fun makeDeleteCategoryRequest(
+    newCategoryId: Long
+): DeleteCategoryRequest {
+    return DeleteCategoryRequest.builder()
+        .newCategoryId(newCategoryId)
         .build()
 }
 

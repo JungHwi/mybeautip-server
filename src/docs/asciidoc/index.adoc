@@ -251,6 +251,7 @@ include::overview.adoc[]
 * link:store/admin_search_store_category.html[스토어 카테고리 조회 API, window=_blank]
 * link:store/admin_get_store_category.html[스토어 카테고리 상세 조회 API, window=_blank]
 * link:store/admin_edit_store_category.html[스토어 카테고리 수정 API, window=_blank]
+* link:store/admin_delete_store_category.html[스토어 카테고리 삭제 API, window=_blank]
 
 === Admin EVENT API
 * link:event/admin_create_event.html[이벤트 생성 API, window=_blank]

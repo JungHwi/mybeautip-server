@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,5 +52,12 @@ public class AdminStoreCategoryController {
                                       @RequestBody EditStoreCategoryRequest request) {
 
         return service.edit(categoryId, request);
+    }
+
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity delete(@PathVariable long categoryId,
+                                 @RequestBody DeleteCategoryRequest request) {
+        service.delete(categoryId, request);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

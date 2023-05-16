@@ -1,0 +1,3 @@
+== Admin Delete Store Category API
+
+operation::admin_delete_store_category[snippets='http-request,path-parameters,request-fields,http-response']

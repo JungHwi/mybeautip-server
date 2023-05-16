@@ -80,6 +80,10 @@ public class StoreCategory extends CreatedAtBaseEntity {
         }
     }
 
+    public void delete() {
+        this.status = StoreCategoryStatus.DELETE;
+    }
+
     private void validCreate(CreateStoreCategoryRequest request) {
         validName(request.name());
         validDetail(request.categoryDetailList());

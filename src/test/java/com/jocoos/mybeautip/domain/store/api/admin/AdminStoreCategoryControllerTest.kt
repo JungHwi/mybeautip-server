@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.COUNTRY_CODE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.STORE_CATEGORY_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.testutil.fixture.makeDeleteCategoryRequest
 import com.jocoos.mybeautip.testutil.fixture.makeStoreCategory
 import com.jocoos.mybeautip.testutil.fixture.makeStoreCategoryRequest
 import org.junit.jupiter.api.Test
@@ -162,6 +163,35 @@ class AdminStoreCategoryControllerTest(
                     fieldWithPath("category_detail_list.[].country").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
                     fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
                 )
+            )
+        )
+    }
+
+    @Test
+    fun delete() {
+        val oldCategory = saveStoreCategory()
+        val newCategory = saveStoreCategory()
+        val request = makeDeleteCategoryRequest(newCategory.id)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                delete("/admin/store/category/{categoryId}", oldCategory.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isNoContent)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_delete_store_category",
+                pathParameters(
+                    parameterWithName("categoryId").description("스토어 카테고리 ID")
+                ),
+                requestFields(
+                fieldWithPath("new_category_id").type(NUMBER).description("새로운 카테고리 아이디"),
+            ),
             )
         )
     }

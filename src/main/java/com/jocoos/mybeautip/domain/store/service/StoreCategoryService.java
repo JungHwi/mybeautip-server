@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.store.converter.StoreCategoryConverter;
 import com.jocoos.mybeautip.domain.store.dto.*;
 import com.jocoos.mybeautip.domain.store.persistence.domain.StoreCategory;
 import com.jocoos.mybeautip.domain.store.service.dao.StoreCategoryDao;
+import com.jocoos.mybeautip.domain.store.service.dao.StoreDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StoreCategoryService {
 
     private final StoreCategoryDao dao;
+    private final StoreDao storeDao;
     private final StoreCategoryConverter converter;
 
     @Transactional
@@ -38,5 +40,12 @@ public class StoreCategoryService {
         StoreCategory storeCategory = dao.get(categoryId);
         storeCategory.edit(request);
         return converter.converts(storeCategory);
+    }
+
+    @Transactional
+    public void delete(long categoryId, DeleteCategoryRequest request) {
+        storeDao.changeCategory(categoryId, request.newCategoryId());
+        StoreCategory oldStoreCategory = dao.get(categoryId);
+        oldStoreCategory.delete();
     }
 }
