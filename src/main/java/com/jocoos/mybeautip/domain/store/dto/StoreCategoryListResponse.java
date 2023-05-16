@@ -9,6 +9,7 @@ public class StoreCategoryListResponse {
 
     private long id;
     private String name;
+    private int sort;
     private long displayCount;
 
     @QueryProjection
@@ -17,6 +18,7 @@ public class StoreCategoryListResponse {
 
         this.id = storeCategory.getId();
         this.name = storeCategory.getName();
+        this.sort = storeCategory.getSort();
         this.displayCount = displayCount;
     }
 }

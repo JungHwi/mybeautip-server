@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.COUNTRY_CODE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.STORE_CATEGORY_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.testutil.fixture.makeChangeCategoryRequest
 import com.jocoos.mybeautip.testutil.fixture.makeDeleteCategoryRequest
 import com.jocoos.mybeautip.testutil.fixture.makeStoreCategory
 import com.jocoos.mybeautip.testutil.fixture.makeStoreCategoryRequest
@@ -50,8 +51,9 @@ class AdminStoreCategoryControllerTest(
                     fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
                 ),
                 responseFields(
-                    fieldWithPath("id").type(NUMBER).description("스토어 대표 카테고리 ID"),
-                    fieldWithPath("code").type(STRING).description("스토어 대표 카테고리 코드"),
+                    fieldWithPath("id").type(NUMBER).description("스토어 카테고리 ID"),
+                    fieldWithPath("code").type(STRING).description("스토어 카테고리 코드"),
+                    fieldWithPath("sort").type(NUMBER).description("스토어 카테고리 정렬"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(STORE_CATEGORY_STATUS)),
                     fieldWithPath("name").type(STRING).description("스토어 대표 카테고리"),
                     fieldWithPath("category_detail_list").type(ARRAY).description("카테고리 상세 정보(국가별)"),
@@ -87,6 +89,7 @@ class AdminStoreCategoryControllerTest(
                     fieldWithPath("content").type(ARRAY).description("스토어 카테고리 목록"),
                     fieldWithPath("content.[].id").type(NUMBER).description("스토어 카테고리 ID"),
                     fieldWithPath("content.[].name").type(STRING).description("스토어 카테고리명"),
+                    fieldWithPath("content.[].sort").type(NUMBER).description("스토어 카테고리 정렬 순서"),
                     fieldWithPath("content.[].display_count").type(NUMBER).description("전시 상품수"),
                 )
             )
@@ -114,8 +117,9 @@ class AdminStoreCategoryControllerTest(
                     parameterWithName("categoryId").description("스토어 카테고리 ID")
                 ),
                 responseFields(
-                    fieldWithPath("id").type(NUMBER).description("스토어 대표 카테고리 ID"),
-                    fieldWithPath("code").type(STRING).description("스토어 대표 카테고리 코드"),
+                    fieldWithPath("id").type(NUMBER).description("스토어 카테고리 ID"),
+                    fieldWithPath("code").type(STRING).description("스토어 카테고리 코드"),
+                    fieldWithPath("sort").type(NUMBER).description("스토어 카테고리 정렬"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(STORE_CATEGORY_STATUS)),
                     fieldWithPath("name").type(STRING).description("스토어 대표 카테고리"),
                     fieldWithPath("category_detail_list").type(ARRAY).description("카테고리 상세 정보(국가별)"),
@@ -155,10 +159,11 @@ class AdminStoreCategoryControllerTest(
                     fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
                 ),
                 responseFields(
-                    fieldWithPath("id").type(NUMBER).description("스토어 대표 카테고리 ID"),
-                    fieldWithPath("code").type(STRING).description("스토어 대표 카테고리 코드"),
+                    fieldWithPath("id").type(NUMBER).description("스토어 카테고리 ID"),
+                    fieldWithPath("code").type(STRING).description("스토어 카테고리 코드"),
+                    fieldWithPath("sort").type(NUMBER).description("스토어 카테고리 정렬"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(STORE_CATEGORY_STATUS)),
-                    fieldWithPath("name").type(STRING).description("스토어 대표 카테고리"),
+                    fieldWithPath("name").type(STRING).description("스토어 대표 카테고리명"),
                     fieldWithPath("category_detail_list").type(ARRAY).description("카테고리 상세 정보(국가별)"),
                     fieldWithPath("category_detail_list.[].country").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
                     fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
@@ -190,13 +195,54 @@ class AdminStoreCategoryControllerTest(
                     parameterWithName("categoryId").description("스토어 카테고리 ID")
                 ),
                 requestFields(
-                fieldWithPath("new_category_id").type(NUMBER).description("새로운 카테고리 아이디"),
+                fieldWithPath("number").type(NUMBER).description("새로운 카테고리 아이디"),
             ),
             )
         )
     }
 
-    fun saveStoreCategory(): StoreCategory {
-        return repository.save(makeStoreCategory())
+    @Test
+    fun changeSort() {
+        val category = saveStoreCategory(1)
+        val otherCategory = saveStoreCategory(2)
+        val request = makeChangeCategoryRequest(otherCategory.sort)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/admin/store/category/{categoryId}", category.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_change_sort_store_category",
+                pathParameters(
+                    parameterWithName("categoryId").description("스토어 카테고리 ID")
+                ),
+                requestFields(
+                    fieldWithPath("number").type(NUMBER).description("새로운 정렬 순서"),
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("스토어 카테고리 ID"),
+                    fieldWithPath("code").type(STRING).description("스토어 카테고리 코드"),
+                    fieldWithPath("sort").type(NUMBER).description("스토어 카테고리 정렬"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(STORE_CATEGORY_STATUS)),
+                    fieldWithPath("name").type(STRING).description("스토어 대표 카테고리명"),
+                    fieldWithPath("category_detail_list").type(ARRAY).description("카테고리 상세 정보(국가별)"),
+                    fieldWithPath("category_detail_list.[].country").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
+                )
+            )
+        )
+    }
+
+    fun saveStoreCategory(
+        sort: Int? = 1
+    ): StoreCategory {
+        return repository.save(makeStoreCategory(sort = sort))
     }
 }

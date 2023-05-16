@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.domain.store.api.admin;
 import com.jocoos.mybeautip.domain.store.code.StoreCategoryStatus;
 import com.jocoos.mybeautip.domain.store.dto.*;
 import com.jocoos.mybeautip.domain.store.service.StoreCategoryService;
+import com.jocoos.mybeautip.global.dto.single.IntegerDto;
+import com.jocoos.mybeautip.global.dto.single.LongDto;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,8 +58,14 @@ public class AdminStoreCategoryController {
 
     @DeleteMapping("/{categoryId}")
     public ResponseEntity delete(@PathVariable long categoryId,
-                                 @RequestBody DeleteCategoryRequest request) {
-        service.delete(categoryId, request);
+                                 @RequestBody LongDto request) {
+        service.delete(categoryId, request.getNumber());
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/{categoryId}")
+    public StoreCategoryResponse changeSort(@PathVariable long categoryId,
+                                            @RequestBody IntegerDto request) {
+        return service.changeSort(categoryId, request.getNumber());
     }
 }

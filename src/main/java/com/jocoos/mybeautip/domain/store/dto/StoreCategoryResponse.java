@@ -8,5 +8,6 @@ public record StoreCategoryResponse(long id,
                                     String code,
                                     StoreCategoryStatus status,
                                     String name,
+                                    int sort,
                                     List<StoreCategoryDetailDto> categoryDetailList) {
 }

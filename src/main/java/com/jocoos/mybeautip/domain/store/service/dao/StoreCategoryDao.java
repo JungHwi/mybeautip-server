@@ -42,6 +42,22 @@ public class StoreCategoryDao {
                 .orElseThrow(() -> new NotFoundException(STORE_CATEGORY_NOT_FOUND, "Store category not found. id - " + categoryId));
     }
 
+    @Transactional
+    public StoreCategory changeSort(long categoryId, int sort) {
+        StoreCategory storeCategory = this.get(categoryId);
+
+        if (storeCategory.getSort() == sort) {
+            throw new BadRequestException("The sort value for the requested category is the same as the requested value.");
+        }
+        int adjustSort = storeCategory.getSort() > sort ? 1 : -1;
+        int minSort = storeCategory.getSort() > sort ? sort : storeCategory.getSort();
+        int maxSort = storeCategory.getSort() < sort ? sort : storeCategory.getSort();
+
+        repository.changeSort(minSort, maxSort, adjustSort);
+        storeCategory.changeSort(sort);
+        return storeCategory;
+    }
+
     private String generateCode() {
         for (int index = 0; index < 5; index++) {
             String code = RandomUtils.generateStoreCategoryCode();

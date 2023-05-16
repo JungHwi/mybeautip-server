@@ -84,6 +84,10 @@ public class StoreCategory extends CreatedAtBaseEntity {
         this.status = StoreCategoryStatus.DELETE;
     }
 
+    public void changeSort(int sort) {
+        this.sort = sort;
+    }
+
     private void validCreate(CreateStoreCategoryRequest request) {
         validName(request.name());
         validDetail(request.categoryDetailList());

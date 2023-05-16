@@ -43,9 +43,16 @@ public class StoreCategoryService {
     }
 
     @Transactional
-    public void delete(long categoryId, DeleteCategoryRequest request) {
-        storeDao.changeCategory(categoryId, request.newCategoryId());
+    public void delete(long categoryId, long newCategoryId) {
+        storeDao.changeCategory(categoryId, newCategoryId);
         StoreCategory oldStoreCategory = dao.get(categoryId);
         oldStoreCategory.delete();
+    }
+
+    @Transactional
+    public StoreCategoryResponse changeSort(long categoryId, int sort) {
+        StoreCategory storeCategory = dao.changeSort(categoryId, sort);
+
+        return converter.converts(storeCategory);
     }
 }
