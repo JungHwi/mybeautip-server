@@ -1,27 +1,21 @@
 package com.jocoos.mybeautip.domain.store.api.admin
 
-import com.jocoos.mybeautip.domain.store.code.StoreCategoryStatus
-import com.jocoos.mybeautip.domain.store.dto.CreateStoreCategoryRequest
-import com.jocoos.mybeautip.domain.store.dto.StoreCategoryDetailDto
 import com.jocoos.mybeautip.domain.store.persistence.domain.StoreCategory
 import com.jocoos.mybeautip.domain.store.persistence.repository.StoreCategoryRepository
-import com.jocoos.mybeautip.global.code.CountryCode
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.COUNTRY_CODE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.STORE_CATEGORY_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.testutil.fixture.makeStoreCategory
+import com.jocoos.mybeautip.testutil.fixture.makeStoreCategoryRequest
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
-import org.springframework.restdocs.request.RequestDocumentation
-import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
-import org.springframework.restdocs.request.RequestDocumentation.requestParameters
+import org.springframework.restdocs.request.RequestDocumentation.*
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -32,12 +26,7 @@ class AdminStoreCategoryControllerTest(
 
     @Test
     fun create() {
-        val details = listOf(StoreCategoryDetailDto(CountryCode.KR, "한국 카테고리"), StoreCategoryDetailDto(CountryCode.TH, "태국 카테고리"));
-        val request = CreateStoreCategoryRequest.builder()
-            .name("대표 카테고리")
-            .status(StoreCategoryStatus.ACTIVE)
-            .categoryDetailList(details)
-            .build();
+        val request = makeStoreCategoryRequest()
 
         val result: ResultActions = mockMvc
             .perform(
@@ -120,8 +109,49 @@ class AdminStoreCategoryControllerTest(
         result.andDo(
             document(
                 "admin_get_store_category",
-                RequestDocumentation.pathParameters(
+                pathParameters(
                     parameterWithName("categoryId").description("스토어 카테고리 ID")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("스토어 대표 카테고리 ID"),
+                    fieldWithPath("code").type(STRING).description("스토어 대표 카테고리 코드"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(STORE_CATEGORY_STATUS)),
+                    fieldWithPath("name").type(STRING).description("스토어 대표 카테고리"),
+                    fieldWithPath("category_detail_list").type(ARRAY).description("카테고리 상세 정보(국가별)"),
+                    fieldWithPath("category_detail_list.[].country").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
+                )
+            )
+        )
+    }
+
+    @Test
+    fun edit() {
+        val category = saveStoreCategory()
+        val request = makeStoreCategoryRequest()
+
+        val result: ResultActions = mockMvc
+            .perform(
+                put("/admin/store/category/{categoryId}", category.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_edit_store_category",
+                pathParameters(
+                    parameterWithName("categoryId").description("스토어 카테고리 ID")
+                ),
+                requestFields(
+                    fieldWithPath("name").type(STRING).description("스토어 대표 카테고리명"),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(STORE_CATEGORY_STATUS)),
+                    fieldWithPath("category_detail_list").type(ARRAY).description("카테고리 상세 정보(국가별)"),
+                    fieldWithPath("category_detail_list.[].country").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("category_detail_list.[].name").type(STRING).description("국가별 카테고리명")
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("스토어 대표 카테고리 ID"),

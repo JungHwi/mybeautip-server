@@ -16,13 +16,19 @@ fun makeStoreCategory(
 fun makeStoreCategoryRequest(
     status: StoreCategoryStatus = StoreCategoryStatus.ACTIVE,
     name: String = "대표 카테고리",
-    list: List<StoreCategoryDetailDto> = mutableListOf(makeStoreCategoryDetail())
+    list: List<StoreCategoryDetailDto> = makeStoreCategoryDetailList()
 ): CreateStoreCategoryRequest {
     return CreateStoreCategoryRequest.builder()
         .status(status)
         .name(name)
         .categoryDetailList(list)
         .build()
+}
+
+fun makeStoreCategoryDetailList(): List<StoreCategoryDetailDto> {
+    return mutableListOf(makeStoreCategoryDetail(country = CountryCode.KR, name = "한국 카테고리"),
+        makeStoreCategoryDetail(country = CountryCode.TH, name = "태국 카테고리"),
+        makeStoreCategoryDetail(country = CountryCode.VN, name = "베트남 카테고리"))
 }
 
 fun makeStoreCategoryDetail(

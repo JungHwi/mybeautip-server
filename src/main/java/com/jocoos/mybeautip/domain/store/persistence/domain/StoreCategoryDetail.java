@@ -40,4 +40,8 @@ public class StoreCategoryDetail {
     public static StoreCategoryDetail of(StoreCategoryDetailDto detailDto) {
         return new StoreCategoryDetail(detailDto.country(), detailDto.name());
     }
+
+    public void edit(String name) {
+        this.name = name;
+    }
 }

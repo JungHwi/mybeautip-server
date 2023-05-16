@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.jocoos.mybeautip.global.exception.ErrorCode.STORE_CATEGORY_NOT_FOUND;
 
@@ -20,6 +21,7 @@ public class StoreCategoryDao {
 
     private final StoreCategoryRepository repository;
 
+    @Transactional
     public StoreCategory create(CreateStoreCategoryRequest request) {
         String code = generateCode();
         int sort = repository.findTopByOrderBySortDesc()
@@ -29,10 +31,12 @@ public class StoreCategoryDao {
         return repository.save(storeCategory);
     }
 
+    @Transactional(readOnly = true)
     public Page<StoreCategoryListResponse> search(SearchStoreCategoryRequest request) {
         return repository.search(request);
     }
 
+    @Transactional(readOnly = true)
     public StoreCategory get(long categoryId) {
         return repository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException(STORE_CATEGORY_NOT_FOUND, "Store category not found. id - " + categoryId));
@@ -47,5 +51,4 @@ public class StoreCategoryDao {
         }
         throw new BadRequestException("Store Category Code 생성에 실패하였습니다.");
     }
-
 }

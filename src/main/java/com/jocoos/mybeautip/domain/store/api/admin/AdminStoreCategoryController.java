@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.domain.store.api.admin;
 
 import com.jocoos.mybeautip.domain.store.code.StoreCategoryStatus;
-import com.jocoos.mybeautip.domain.store.dto.CreateStoreCategoryRequest;
-import com.jocoos.mybeautip.domain.store.dto.SearchStoreCategoryRequest;
-import com.jocoos.mybeautip.domain.store.dto.StoreCategoryListResponse;
-import com.jocoos.mybeautip.domain.store.dto.StoreCategoryResponse;
+import com.jocoos.mybeautip.domain.store.dto.*;
 import com.jocoos.mybeautip.domain.store.service.StoreCategoryService;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +43,12 @@ public class AdminStoreCategoryController {
     @GetMapping("/{categoryId}")
     public StoreCategoryResponse get(@PathVariable long categoryId) {
         return service.get(categoryId);
+    }
+
+    @PutMapping("/{categoryId}")
+    public StoreCategoryResponse edit(@PathVariable long categoryId,
+                                      @RequestBody EditStoreCategoryRequest request) {
+
+        return service.edit(categoryId, request);
     }
 }
