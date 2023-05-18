@@ -167,6 +167,11 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("BrandyStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getBrandStatus()))
                         ),
+                        // Delivery
+                        customResponseFields("custom-response", beneathPath("data.delivery_company_status").withSubsectionId("company_status"),
+                                attributes(key("title").value("DeliveryCompanyStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getDeliveryCompanyStatus()))
+                        ),
                         // Product
                         // Store
                         customResponseFields("custom-response", beneathPath("data.store_category_status").withSubsectionId("store_category_status"),

@@ -31,6 +31,7 @@ public class DocumentLinkGenerator {
         COMPANY_STATUS("company_status", "회사 상태"),
         BRAND_STATUS("brand_status", "브랜드 상태"),
         STORE_CATEGORY_STATUS("store_category_status", "스토어 카테고리 상태"),
+        DELIVERY_COMPANY_STATUS("delivery_company_status", "배송업체 상태"),
         PROCESS_PERMISSION("process_permission", "승인절차 권한"),
         VIDEO_CATEGORY_TYPE("video_category_type", "비디오 카테고리 구분"),
         VIDEO_MASK_TYPE("video_mask_type", "비디오 마스크 구분"),

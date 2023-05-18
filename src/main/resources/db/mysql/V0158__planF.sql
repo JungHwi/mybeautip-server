@@ -84,6 +84,14 @@ create table store
     category_id bigint not null comment '카테고리 아이디'
 ) charset = utf8mb4 comment '스토어 정보';
 
+create table delivery_company (
+    id          bigint auto_increment primary key comment '배송업체 아이디',
+    code        char(4) comment '배송업체 코드',
+    status      varchar(20) not null comment '배송업체 상태',
+    name        varchar(20) not null comment '배송업체 명',
+    url         varchar(1000) not null comment '배송조회 URL'
+) charset = utf8mb4 comment '배송업체 정보';
+
 
 # delete from flyway_schema_history where version = '0158';
 # drop table company;
@@ -93,3 +101,5 @@ create table store
 # drop table brand;
 # drop table store_category;
 # drop table store_category_detail;
+# drop table store;
+# drop table delivery_company;

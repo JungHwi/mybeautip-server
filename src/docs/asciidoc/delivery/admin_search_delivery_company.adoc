@@ -1,0 +1,3 @@
+== Admin Search Delivery Company API
+
+operation::admin_search_delivery_company[snippets='http-request,http-response,response-fields']

@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
 import com.jocoos.mybeautip.domain.company.code.ProcessPermission;
+import com.jocoos.mybeautip.domain.delivery.code.DeliveryCompanyStatus;
 import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
@@ -102,6 +103,9 @@ public class CommonDocController {
 
         // Brand
         Map<String, String> brandStatus = getDocs(BrandStatus.values());
+
+        // Delivery
+        Map<String, String> deliveryCompanyStatus = getDocs(DeliveryCompanyStatus.values());
 
         // Product
 
@@ -204,6 +208,8 @@ public class CommonDocController {
                         .processPermission(processPermission)
                 // Brand
                         .brandStatus(brandStatus)
+                // Delivery
+                        .deliveryCompanyStatus(deliveryCompanyStatus)
                 // Product
                 // Store
                         .storeCategoryStatus(storeCategoryStatus)

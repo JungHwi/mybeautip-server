@@ -58,6 +58,9 @@ public class EnumDocs {
     // Brand
     Map<String, String> brandStatus;
 
+    // Delivery
+    Map<String, String> deliveryCompanyStatus;
+
     // Product
 
     // Store

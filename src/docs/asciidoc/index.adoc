@@ -246,6 +246,10 @@ include::overview.adoc[]
 * link:brand/admin_edit_brand.html[브랜드 수정 API, window=_blank]
 * link:brand/admin_delete_brand.html[브랜드 삭제 API, window=_blank]
 
+=== Admin Delivery Company API
+* link:delivery/admin_create_delivery_company.html[배송업체 생성 API, window=_blank]
+* link:delivery/admin_search_delivery_company.html[배송업체 조회 API, window=_blank]
+
 === Admin Store API
 * link:store/admin_create_store_category.html[스토어 카테고리 생성 API, window=_blank]
 * link:store/admin_search_store_category.html[스토어 카테고리 조회 API, window=_blank]
