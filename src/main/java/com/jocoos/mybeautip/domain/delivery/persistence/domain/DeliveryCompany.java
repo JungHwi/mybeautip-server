@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.delivery.persistence.domain;
 
 import com.jocoos.mybeautip.domain.delivery.code.DeliveryCompanyStatus;
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryCompanyRequest;
+import com.jocoos.mybeautip.domain.delivery.dto.EditDeliveryCompanyRequest;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,11 +40,30 @@ public class DeliveryCompany {
         this.url = request.url();
     }
 
+    public void edit(EditDeliveryCompanyRequest request) {
+        validEdit(request);
+        this.status = request.status();
+        this.name = request.name();
+        this.url = request.url();
+    }
+
+    public void delete() {
+        if (this.status != DeliveryCompanyStatus.INACTIVE) {
+            throw new BadRequestException("You can only delete them when they are [INACTIVE].");
+        }
+        this.status = DeliveryCompanyStatus.DELETE;
+    }
+
     public void generateCode() {
         this.code = String.format("%04d", id);
     }
 
     private void validCreate(CreateDeliveryCompanyRequest request) {
+        validName(request.name());
+        validUrl(request.url());
+    }
+
+    private void validEdit(EditDeliveryCompanyRequest request) {
         validName(request.name());
         validUrl(request.url());
     }

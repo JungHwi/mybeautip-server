@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.delivery.code.DeliveryCompanyStatus;
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryCompanyRequest;
 import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryCompany;
 import com.jocoos.mybeautip.domain.delivery.persistence.repository.DeliveryCompanyRepository;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,5 +28,11 @@ public class DeliveryCompanyDao {
     @Transactional(readOnly = true)
     public List<DeliveryCompany> search() {
         return repository.findByStatusIn(List.of(DeliveryCompanyStatus.ACTIVE, DeliveryCompanyStatus.INACTIVE));
+    }
+
+    @Transactional(readOnly = true)
+    public DeliveryCompany get(long deliveryCompanyId) {
+        return repository.findById(deliveryCompanyId)
+                .orElseThrow(() -> new NotFoundException("Delivery Company not found. id - " + deliveryCompanyId));
     }
 }

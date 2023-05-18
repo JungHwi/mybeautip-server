@@ -11,7 +11,7 @@ fun makeDeliveryCompany(
 }
 
 fun makeCreateDeliveryCompanyRequest (
-    status: DeliveryCompanyStatus = DeliveryCompanyStatus.ACTIVE,
+    status: DeliveryCompanyStatus? = DeliveryCompanyStatus.ACTIVE,
     name: String = "엄청 큰 택배회사",
     url: String = "https://www.cjlogistics.com/ko/tool/parcel/tracking"
 ): CreateDeliveryCompanyRequest {

@@ -1,0 +1,3 @@
+== Admin Delete Delivery Company API
+
+operation::admin_delete_delivery_company[snippets='http-request,path-parameters,http-response']
