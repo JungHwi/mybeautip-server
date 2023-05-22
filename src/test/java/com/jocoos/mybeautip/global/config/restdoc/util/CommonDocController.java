@@ -7,7 +7,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.company.code.CompanyStatus;
 import com.jocoos.mybeautip.domain.company.code.ProcessPermission;
-import com.jocoos.mybeautip.domain.delivery.code.DeliveryCompanyStatus;
+import com.jocoos.mybeautip.domain.delivery.code.*;
 import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
@@ -106,6 +106,10 @@ public class CommonDocController {
 
         // Delivery
         Map<String, String> deliveryCompanyStatus = getDocs(DeliveryCompanyStatus.values());
+        Map<String, String> deliveryFeeStatus = getDocs(DeliveryFeeStatus.values());
+        Map<String, String> deliveryFeeType = getDocs(DeliveryFeeType.values());
+        Map<String, String> deliveryMethod = getDocs(DeliveryMethod.values());
+        Map<String, String> paymentOption = getDocs(PaymentOption.values());
 
         // Product
 
@@ -210,6 +214,10 @@ public class CommonDocController {
                         .brandStatus(brandStatus)
                 // Delivery
                         .deliveryCompanyStatus(deliveryCompanyStatus)
+                        .deliveryFeeStatus(deliveryFeeStatus)
+                        .deliveryFeeType(deliveryFeeType)
+                        .deliveryMethod(deliveryMethod)
+                        .paymentOption(paymentOption)
                 // Product
                 // Store
                         .storeCategoryStatus(storeCategoryStatus)

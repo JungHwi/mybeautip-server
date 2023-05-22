@@ -172,6 +172,22 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("DeliveryCompanyStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getDeliveryCompanyStatus()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.delivery_fee_status").withSubsectionId("delivery_fee_status"),
+                                attributes(key("title").value("DeliveryFeeStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getDeliveryFeeStatus()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.delivery_fee_type").withSubsectionId("delivery_fee_type"),
+                                attributes(key("title").value("DeliveryFeeType")),
+                                enumConvertFieldDescriptor((enumDocs.getDeliveryFeeType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.delivery_method").withSubsectionId("delivery_method"),
+                                attributes(key("title").value("DeliveryMethod")),
+                                enumConvertFieldDescriptor((enumDocs.getDeliveryMethod()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.payment_option").withSubsectionId("payment_option"),
+                                attributes(key("title").value("PaymentOption")),
+                                enumConvertFieldDescriptor((enumDocs.getPaymentOption()))
+                        ),
                         // Product
                         // Store
                         customResponseFields("custom-response", beneathPath("data.store_category_status").withSubsectionId("store_category_status"),

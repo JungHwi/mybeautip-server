@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[payment_option]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-payment_option.adoc[]

@@ -252,6 +252,9 @@ include::overview.adoc[]
 * link:delivery/admin_edit_delivery_company.html[배송업체 수정 API, window=_blank]
 * link:delivery/admin_delete_delivery_company.html[배송업체 삭제 API, window=_blank]
 
+=== Admin Delivery Fee Polish API
+* link:delivery/admin_create_delivery_fee_polish.html[배송비 생성 API, window=_blank]
+
 === Admin Store API
 * link:store/admin_create_store_category.html[스토어 카테고리 생성 API, window=_blank]
 * link:store/admin_search_store_category.html[스토어 카테고리 조회 API, window=_blank]

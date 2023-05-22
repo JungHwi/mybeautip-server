@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[delivery_fee_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-delivery_fee_type.adoc[]

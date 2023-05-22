@@ -92,6 +92,27 @@ create table delivery_company (
     url         varchar(1000) not null comment '배송조회 URL'
 ) charset = utf8mb4 comment '배송업체 정보';
 
+create table delivery_fee_policy (
+    id                  bigint auto_increment primary key comment '배송비정책 아이디',
+    code                char(4) not null comment '배송코드',
+    company_id          bigint not null comment '공급사 아이디',
+    name                varchar(20) not null comment '대표 배송비명',
+    status              varchar(20) not null comment '배송비 상태',
+    type                varchar(20) not null comment '배송비 유형',
+    is_default          boolean not null comment '기본 배송비 여부',
+    delivery_method     varchar(20) not null comment '배송방식',
+    payment_option      varchar(20) not null comment '결제방식'
+) charset = utf8mb4 comment '배송비 정책 정보';
+
+create table delivery_fee_policy_detail (
+    id                      bigint auto_increment primary key comment '배송비정책 상세 아이디',
+    delivery_fee_policy_id  bigint not null comment '배송비정책 아이디',
+    country_code            char(2) not null comment '국가코드',
+    name                    varchar(20) not null comment '국가별 배송비명',
+    threshold               int comment '배송비 분기 조건',
+    fee_below_threshold     int not null comment '조건 미만 배송비',
+    fee_above_threshold     int not null comment '조건 이상 배송비'
+) charset = utf8mb4 comment '배송비 정책 정보';
 
 # delete from flyway_schema_history where version = '0158';
 # drop table company;
@@ -103,3 +124,5 @@ create table delivery_company (
 # drop table store_category_detail;
 # drop table store;
 # drop table delivery_company;
+# drop table delivery_fee_policy;
+# drop table delivery_fee_policy_detail;
