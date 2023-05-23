@@ -101,7 +101,8 @@ create table delivery_fee_policy (
     type                varchar(20) not null comment '배송비 유형',
     is_default          boolean not null comment '기본 배송비 여부',
     delivery_method     varchar(20) not null comment '배송방식',
-    payment_option      varchar(20) not null comment '결제방식'
+    payment_option      varchar(20) not null comment '결제방식',
+    created_at          datetime not null comment '등록일'
 ) charset = utf8mb4 comment '배송비 정책 정보';
 
 create table delivery_fee_policy_detail (

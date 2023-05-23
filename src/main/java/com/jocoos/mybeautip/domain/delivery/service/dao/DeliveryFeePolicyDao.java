@@ -2,11 +2,14 @@ package com.jocoos.mybeautip.domain.delivery.service.dao;
 
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyRequest;
+import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicySearchRequest;
 import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryFeePolicy;
 import com.jocoos.mybeautip.domain.delivery.persistence.repository.DeliveryFeePolicyRepository;
+import com.jocoos.mybeautip.domain.delivery.vo.DeliveryFeePolicySearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,11 @@ public class DeliveryFeePolicyDao {
         DeliveryFeePolicy deliveryFeePolicy = new DeliveryFeePolicy(company, request);
 
         return repository.save(deliveryFeePolicy);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<DeliveryFeePolicySearchResult> search(DeliveryFeePolicySearchRequest request) {
+        return repository.search(request);
     }
 
     private String generateCode() {

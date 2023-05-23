@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.domain.delivery.api.admin
 
-import com.jocoos.mybeautip.domain.company.dto.CompanyResponse
-import com.jocoos.mybeautip.domain.company.service.CompanyService
+import com.jocoos.mybeautip.domain.company.persistence.domain.Company
+import com.jocoos.mybeautip.domain.company.service.dao.CompanyDao
+import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryFeePolicy
 import com.jocoos.mybeautip.domain.delivery.service.dao.DeliveryFeePolicyDao
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
@@ -13,21 +15,22 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
+import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
+import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.transaction.annotation.Transactional
 
 class AdminDeliveryFeePolicyControllerTest (
     private val dao: DeliveryFeePolicyDao,
-    private val companyService: CompanyService
+    private val companyDao: CompanyDao
 ) : RestDocsIntegrationTestSupport() {
 
     @Test
-    @Transactional
     fun create() {
         val company = saveCompany()
         val request = makeCreateDeliveryFeePolicyRequest(company.id)
@@ -81,7 +84,56 @@ class AdminDeliveryFeePolicyControllerTest (
         )
     }
 
-    fun saveCompany(): CompanyResponse {
-        return companyService.create(makeCompanyRequest())
+    @Test
+    fun search() {
+        saveDeliveryFee()
+
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/delivery/fee")
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_search_delivery_fee_polish",
+                requestParameters(
+                    parameterWithName("search_field").description(generateLinkCode(DELIVERY_FEE_SEARCH_FIELD)).optional(),
+                    parameterWithName("search_text").description("검색어").optional(),
+                    parameterWithName("type").description(generateLinkCode(DELIVERY_FEE_TYPE)).optional(),
+                    parameterWithName("page").description("페이지").optional(),
+                    parameterWithName("size").description("페이지 사이즈").optional()
+                ),
+                responseFields(
+                    fieldWithPath("total").type(NUMBER).description("조회 총수"),
+                    fieldWithPath("content").type(ARRAY).description("조회 결과 데이터"),
+                    fieldWithPath("content.[].id").type(NUMBER).description("배송업체 ID"),
+                    fieldWithPath("content.[].name").type(STRING).description("배송업체 코드"),
+                    fieldWithPath("content.[].company_name").type(STRING).description(generateLinkCode(DELIVERY_COMPANY_STATUS)),
+                    fieldWithPath("content.[].type").type(STRING).description("배송업체명"),
+                    fieldWithPath("content.[].is_default").type(BOOLEAN).description("배송조회 API URL"),
+                    fieldWithPath("content.[].delivery_method").type(STRING).description("배송조회 API URL"),
+                    fieldWithPath("content.[].created_at").type(STRING).description("등록일시").attributes(DocumentAttributeGenerator.getZonedDateFormat()),
+                    fieldWithPath("content.[].details").type(ARRAY).description("배송비 국가별 상세 정보"),
+                    fieldWithPath("content.[].details.[].id").type(NUMBER).description("배송비 상세 정보 아이디"),
+                    fieldWithPath("content.[].details.[].country_code").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("content.[].details.[].threshold").type(NUMBER).description("배송비 구분값"),
+                    fieldWithPath("content.[].details.[].fee_below_threshold").type(NUMBER).description("구분값 미만 배송비"),
+                    fieldWithPath("content.[].details.[].fee_above_threshold").type(NUMBER).description("구분값 이상 배송비"),
+                )
+            )
+        )
+    }
+
+    fun saveDeliveryFee(): DeliveryFeePolicy {
+        val company = saveCompany()
+        return dao.create(company, makeCreateDeliveryFeePolicyRequest(companyId =  company.id))
+    }
+
+    fun saveCompany(): Company {
+        return companyDao.create(makeCompanyRequest())
     }
 }

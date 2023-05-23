@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.delivery.code.DeliveryMethod;
 import com.jocoos.mybeautip.domain.delivery.code.PaymentOption;
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyDetailRequest;
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyRequest;
+import com.jocoos.mybeautip.global.config.jpa.CreatedAtBaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,7 +22,7 @@ import static javax.persistence.FetchType.LAZY;
 @NoArgsConstructor
 @Entity
 @Table(name = "delivery_fee_policy")
-public class DeliveryFeePolicy {
+public class DeliveryFeePolicy extends CreatedAtBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

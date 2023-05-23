@@ -60,6 +60,7 @@ public class EnumDocs {
 
     // Delivery
     Map<String, String> deliveryCompanyStatus;
+    Map<String, String> deliveryFeeSearchField;
     Map<String, String> deliveryFeeStatus;
     Map<String, String> deliveryFeeType;
     Map<String, String> deliveryMethod;

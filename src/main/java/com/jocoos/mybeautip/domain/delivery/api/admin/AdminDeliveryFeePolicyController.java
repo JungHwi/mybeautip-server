@@ -1,13 +1,17 @@
 package com.jocoos.mybeautip.domain.delivery.api.admin;
 
+import com.jocoos.mybeautip.domain.delivery.code.DeliveryFeeSearchField;
+import com.jocoos.mybeautip.domain.delivery.code.DeliveryFeeType;
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyRequest;
+import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicyListResponse;
 import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicyResponse;
+import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicySearchRequest;
 import com.jocoos.mybeautip.domain.delivery.service.DeliveryFeePolicyService;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,5 +24,17 @@ public class AdminDeliveryFeePolicyController {
     public DeliveryFeePolicyResponse create(@RequestBody CreateDeliveryFeePolicyRequest request) {
 
         return service.create(request);
+    }
+
+    @GetMapping
+    public PageResponse<DeliveryFeePolicyListResponse> search(@RequestParam(required = false, name = "search_field") DeliveryFeeSearchField searchField,
+                                                              @RequestParam(required = false, name = "search_text") String searchText,
+                                                              @RequestParam(required = false) DeliveryFeeType type,
+                                                              @RequestParam(required = false, defaultValue = "1") int page,
+                                                              @RequestParam(required = false, defaultValue = "10") int size ) {
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+        DeliveryFeePolicySearchRequest request = new DeliveryFeePolicySearchRequest(searchField, searchText, type, pageable);
+        return service.search(request);
     }
 }

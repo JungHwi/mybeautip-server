@@ -1,0 +1,3 @@
+== Admin Search Delivery Fee Polish API
+
+operation::admin_search_delivery_fee_polish[snippets='http-request,request-parameters,http-response,response-fields']

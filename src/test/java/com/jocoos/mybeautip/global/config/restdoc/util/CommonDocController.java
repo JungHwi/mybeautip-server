@@ -106,6 +106,7 @@ public class CommonDocController {
 
         // Delivery
         Map<String, String> deliveryCompanyStatus = getDocs(DeliveryCompanyStatus.values());
+        Map<String, String> deliveryFeeSearchField = getDocs(DeliveryFeeSearchField.values());
         Map<String, String> deliveryFeeStatus = getDocs(DeliveryFeeStatus.values());
         Map<String, String> deliveryFeeType = getDocs(DeliveryFeeType.values());
         Map<String, String> deliveryMethod = getDocs(DeliveryMethod.values());
@@ -214,6 +215,7 @@ public class CommonDocController {
                         .brandStatus(brandStatus)
                 // Delivery
                         .deliveryCompanyStatus(deliveryCompanyStatus)
+                        .deliveryFeeSearchField(deliveryFeeSearchField)
                         .deliveryFeeStatus(deliveryFeeStatus)
                         .deliveryFeeType(deliveryFeeType)
                         .deliveryMethod(deliveryMethod)

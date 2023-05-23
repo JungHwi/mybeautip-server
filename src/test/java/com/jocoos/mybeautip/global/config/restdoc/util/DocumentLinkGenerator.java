@@ -32,6 +32,7 @@ public class DocumentLinkGenerator {
         BRAND_STATUS("brand_status", "브랜드 상태"),
         STORE_CATEGORY_STATUS("store_category_status", "스토어 카테고리 상태"),
         DELIVERY_COMPANY_STATUS("delivery_company_status", "배송업체 상태"),
+        DELIVERY_FEE_SEARCH_FIELD("delivery_fee_search_field", "배송비 조회 필드"),
         DELIVERY_FEE_STATUS("delivery_fee_status", "배송비 상태"),
         DELIVERY_FEE_TYPE("delivery_fee_type", "배송비 구분"),
         DELIVERY_METHOD("delivery_method", "배송 방법"),
