@@ -3,10 +3,7 @@ package com.jocoos.mybeautip.domain.delivery.service;
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company;
 import com.jocoos.mybeautip.domain.company.service.dao.CompanyDao;
 import com.jocoos.mybeautip.domain.delivery.converter.DeliveryFeePolicyConverter;
-import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyRequest;
-import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicyListResponse;
-import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicyResponse;
-import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicySearchRequest;
+import com.jocoos.mybeautip.domain.delivery.dto.*;
 import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryFeePolicy;
 import com.jocoos.mybeautip.domain.delivery.service.dao.DeliveryFeePolicyDao;
 import com.jocoos.mybeautip.domain.delivery.vo.DeliveryFeePolicySearchResult;
@@ -38,5 +35,12 @@ public class DeliveryFeePolicyService {
         Page<DeliveryFeePolicySearchResult> results = dao.search(request);
         List<DeliveryFeePolicyListResponse> contents = converter.converts(results.getContent());
         return new PageResponse<>(results.getTotalElements(), contents);
+    }
+
+    @Transactional
+    public DeliveryFeePolicyResponse edit(long deliveryFeeId, EditDeliveryFeePolicyRequest request) {
+        DeliveryFeePolicy deliveryFeePolicy = dao.get(deliveryFeeId);
+        deliveryFeePolicy.edit(request);
+        return converter.converts(deliveryFeePolicy);
     }
 }

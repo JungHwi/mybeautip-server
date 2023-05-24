@@ -2,10 +2,7 @@ package com.jocoos.mybeautip.domain.delivery.api.admin;
 
 import com.jocoos.mybeautip.domain.delivery.code.DeliveryFeeSearchField;
 import com.jocoos.mybeautip.domain.delivery.code.DeliveryFeeType;
-import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyRequest;
-import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicyListResponse;
-import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicyResponse;
-import com.jocoos.mybeautip.domain.delivery.dto.DeliveryFeePolicySearchRequest;
+import com.jocoos.mybeautip.domain.delivery.dto.*;
 import com.jocoos.mybeautip.domain.delivery.service.DeliveryFeePolicyService;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -36,5 +33,12 @@ public class AdminDeliveryFeePolicyController {
         Pageable pageable = PageRequest.of(page - 1, size);
         DeliveryFeePolicySearchRequest request = new DeliveryFeePolicySearchRequest(searchField, searchText, type, pageable);
         return service.search(request);
+    }
+
+    @PutMapping("/{deliveryFeeId}")
+    public DeliveryFeePolicyResponse edit(@PathVariable long deliveryFeeId,
+                                          @RequestBody EditDeliveryFeePolicyRequest request) {
+
+        return service.edit(deliveryFeeId, request);
     }
 }

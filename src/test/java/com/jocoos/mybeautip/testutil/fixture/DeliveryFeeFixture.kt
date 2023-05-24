@@ -7,6 +7,8 @@ import com.jocoos.mybeautip.domain.delivery.code.DeliveryMethod
 import com.jocoos.mybeautip.domain.delivery.code.PaymentOption
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyDetailRequest
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyRequest
+import com.jocoos.mybeautip.domain.delivery.dto.EditDeliveryFeePolicyDetailRequest
+import com.jocoos.mybeautip.domain.delivery.dto.EditDeliveryFeePolicyRequest
 import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryFeePolicy
 import com.jocoos.mybeautip.global.code.CountryCode
 
@@ -53,6 +55,48 @@ fun makeCreateDeliveryFeePolicyDetailRequest(
     feeAboveThreshold: Int = 0
 ): CreateDeliveryFeePolicyDetailRequest {
     return CreateDeliveryFeePolicyDetailRequest.builder()
+        .countryCode(countryCode)
+        .name(name)
+        .threshold(threshold)
+        .feeBelowThreshold(feeBelowThreshold)
+        .feeAboveThreshold(feeAboveThreshold)
+        .build()
+}
+
+fun makeEditDeliveryFeePolicyRequest (
+    name: String? = "대표 배송비명",
+    status: DeliveryFeeStatus? = DeliveryFeeStatus.ACTIVE,
+    type: DeliveryFeeType? = DeliveryFeeType.AMOUNT,
+    deliveryMethod: DeliveryMethod? = DeliveryMethod.COURIER,
+    paymentOption: PaymentOption? = PaymentOption.PREPAID,
+    details: List<EditDeliveryFeePolicyDetailRequest>? = makeEditDeliveryFeePolicyDetailRequestList()
+): EditDeliveryFeePolicyRequest {
+    return EditDeliveryFeePolicyRequest.builder()
+        .name(name)
+        .status(status)
+        .type(type)
+        .deliveryMethod(deliveryMethod)
+        .paymentOption(paymentOption)
+        .details(details)
+        .build()
+}
+
+fun makeEditDeliveryFeePolicyDetailRequestList(): List<EditDeliveryFeePolicyDetailRequest> {
+    return mutableListOf(
+        makeEditDeliveryFeePolicyDetailRequest(countryCode = CountryCode.KR, name = "한국 배송비명", threshold = 50000, feeAboveThreshold = 0, feeBelowThreshold = 3500),
+        makeEditDeliveryFeePolicyDetailRequest(countryCode = CountryCode.TH, name = "태국 배송비명", threshold = 100000, feeAboveThreshold = 0, feeBelowThreshold = 2000),
+        makeEditDeliveryFeePolicyDetailRequest(countryCode = CountryCode.VN, name = "베트남 배송비명", threshold = 200000, feeAboveThreshold = 0, feeBelowThreshold = 500)
+    )
+}
+
+fun makeEditDeliveryFeePolicyDetailRequest(
+    countryCode: CountryCode? = CountryCode.KR,
+    name: String? = "한국 배송비명",
+    threshold: Int?,
+    feeBelowThreshold: Int = 0,
+    feeAboveThreshold: Int = 0
+): EditDeliveryFeePolicyDetailRequest {
+    return EditDeliveryFeePolicyDetailRequest.builder()
         .countryCode(countryCode)
         .name(name)
         .threshold(threshold)

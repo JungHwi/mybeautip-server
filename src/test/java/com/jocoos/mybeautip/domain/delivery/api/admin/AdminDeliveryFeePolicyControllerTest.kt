@@ -11,14 +11,15 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.Doc
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.testutil.fixture.makeCompanyRequest
 import com.jocoos.mybeautip.testutil.fixture.makeCreateDeliveryFeePolicyRequest
+import com.jocoos.mybeautip.testutil.fixture.makeEditDeliveryFeePolicyRequest
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
+import org.springframework.restdocs.request.RequestDocumentation
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import org.springframework.test.web.servlet.ResultActions
@@ -124,6 +125,62 @@ class AdminDeliveryFeePolicyControllerTest (
                     fieldWithPath("content.[].details.[].threshold").type(NUMBER).description("배송비 구분값"),
                     fieldWithPath("content.[].details.[].fee_below_threshold").type(NUMBER).description("구분값 미만 배송비"),
                     fieldWithPath("content.[].details.[].fee_above_threshold").type(NUMBER).description("구분값 이상 배송비"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun edit() {
+        val deliveryFeePolicy = saveDeliveryFee()
+        val request = makeEditDeliveryFeePolicyRequest()
+
+        val result: ResultActions = mockMvc
+            .perform(
+                put("/admin/delivery/fee/{deliveryFeeId}", deliveryFeePolicy.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_edit_delivery_fee_polish",
+                RequestDocumentation.pathParameters(
+                    parameterWithName("deliveryFeeId").description("배송비 ID")
+                ),
+                requestFields(
+                    fieldWithPath("name").type(STRING).description("대표 배송비명"),
+                    fieldWithPath("type").type(STRING).description(generateLinkCode(DELIVERY_FEE_TYPE)),
+                    fieldWithPath("payment_option").type(STRING).description(generateLinkCode(PAYMENT_OPTION)),
+                    fieldWithPath("status").type(STRING).attributes(getDefault("ACTIVE")).description(generateLinkCode(DELIVERY_FEE_STATUS)),
+                    fieldWithPath("delivery_method").type(STRING).attributes(getDefault("COURIER")).description(generateLinkCode(DELIVERY_METHOD)),
+                    fieldWithPath("details").type(ARRAY).description("배송비 국가별 상세 정보"),
+                    fieldWithPath("details.[].country_code").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("details.[].name").type(STRING).description("국가별 배송비명"),
+                    fieldWithPath("details.[].threshold").type(NUMBER).description("국가별 배송비 기준"),
+                    fieldWithPath("details.[].fee_below_threshold").type(NUMBER).description("기준 미만일때의 배송비. type 이 [FIXED][FREE] 일 경우에도 같은 값으로 입력."),
+                    fieldWithPath("details.[].fee_above_threshold").type(NUMBER).description("기준 이상일때의 배송비. type 이 [FIXED][FREE] 일 경우에도 같은 값으로 입력."),
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("배송비 아이디"),
+                    fieldWithPath("code").type(STRING).description("배송비 코드"),
+                    fieldWithPath("company_id").type(NUMBER).description("공급사 아이디"),
+                    fieldWithPath("name").type(STRING).description("대표 배송비명"),
+                    fieldWithPath("is_default").type(BOOLEAN).description("기본 배송비 여부"),
+                    fieldWithPath("type").type(STRING).description(generateLinkCode(DELIVERY_FEE_TYPE)),
+                    fieldWithPath("payment_option").type(STRING).description(generateLinkCode(PAYMENT_OPTION)),
+                    fieldWithPath("status").type(STRING).attributes(getDefault("ACTIVE")).description(generateLinkCode(DELIVERY_FEE_STATUS)),
+                    fieldWithPath("delivery_method").type(STRING).attributes(getDefault("COURIER")).description(generateLinkCode(DELIVERY_METHOD)),
+                    fieldWithPath("details").type(ARRAY).description("배송비 국가별 상세 정보"),
+                    fieldWithPath("details.[].id").type(NUMBER).description("배송비 국가별 상세 정보 아이디"),
+                    fieldWithPath("details.[].country_code").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("details.[].name").type(STRING).description("국가별 배송비명"),
+                    fieldWithPath("details.[].threshold").type(NUMBER).description("국가별 배송비 기준"),
+                    fieldWithPath("details.[].fee_below_threshold").type(NUMBER).description("기준 미만일때의 배송비"),
+                    fieldWithPath("details.[].fee_above_threshold").type(NUMBER).description("기준 이상일때의 배송비"),
                 )
             )
         )

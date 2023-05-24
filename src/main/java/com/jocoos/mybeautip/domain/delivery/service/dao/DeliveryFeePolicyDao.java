@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryFeePolicy
 import com.jocoos.mybeautip.domain.delivery.persistence.repository.DeliveryFeePolicyRepository;
 import com.jocoos.mybeautip.domain.delivery.vo.DeliveryFeePolicySearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,12 @@ public class DeliveryFeePolicyDao {
     @Transactional(readOnly = true)
     public Page<DeliveryFeePolicySearchResult> search(DeliveryFeePolicySearchRequest request) {
         return repository.search(request);
+    }
+
+    @Transactional(readOnly = true)
+    public DeliveryFeePolicy get(long deliveryFeeId) {
+        return repository.findById(deliveryFeeId)
+                .orElseThrow(() -> new NotFoundException("Delivery fee policy not found. id - " + deliveryFeeId));
     }
 
     private String generateCode() {

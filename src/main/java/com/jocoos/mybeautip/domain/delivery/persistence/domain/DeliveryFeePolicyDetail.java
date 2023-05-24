@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.delivery.persistence.domain;
 
 import com.jocoos.mybeautip.domain.delivery.dto.CreateDeliveryFeePolicyDetailRequest;
+import com.jocoos.mybeautip.domain.delivery.dto.EditDeliveryFeePolicyDetailRequest;
 import com.jocoos.mybeautip.global.code.CountryCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,6 +46,13 @@ public class DeliveryFeePolicyDetail {
 
     public DeliveryFeePolicyDetail(CreateDeliveryFeePolicyDetailRequest request) {
         this.countryCode = request.countryCode();
+        this.name = request.name();
+        this.threshold = request.threshold();
+        this.feeBelowThreshold = request.feeBelowThreshold();
+        this.feeAboveThreshold = request.feeAboveThreshold();
+    }
+
+    public void edit(EditDeliveryFeePolicyDetailRequest request) {
         this.name = request.name();
         this.threshold = request.threshold();
         this.feeBelowThreshold = request.feeBelowThreshold();
