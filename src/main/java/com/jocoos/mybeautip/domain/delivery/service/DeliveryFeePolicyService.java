@@ -37,6 +37,12 @@ public class DeliveryFeePolicyService {
         return new PageResponse<>(results.getTotalElements(), contents);
     }
 
+    @Transactional(readOnly = true)
+    public DeliveryFeePolicyResponse get(long deliveryFeeId) {
+        DeliveryFeePolicy deliveryFeePolicy = dao.get(deliveryFeeId);
+        return converter.converts(deliveryFeePolicy);
+    }
+
     @Transactional
     public DeliveryFeePolicyResponse edit(long deliveryFeeId, EditDeliveryFeePolicyRequest request) {
         DeliveryFeePolicy deliveryFeePolicy = dao.get(deliveryFeeId);

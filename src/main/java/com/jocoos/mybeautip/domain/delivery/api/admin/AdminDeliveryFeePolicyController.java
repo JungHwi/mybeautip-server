@@ -35,6 +35,11 @@ public class AdminDeliveryFeePolicyController {
         return service.search(request);
     }
 
+    @GetMapping("/{deliveryFeeId}")
+    public DeliveryFeePolicyResponse get(@PathVariable long deliveryFeeId) {
+        return service.get(deliveryFeeId);
+    }
+
     @PutMapping("/{deliveryFeeId}")
     public DeliveryFeePolicyResponse edit(@PathVariable long deliveryFeeId,
                                           @RequestBody EditDeliveryFeePolicyRequest request) {

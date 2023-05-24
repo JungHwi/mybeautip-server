@@ -1,0 +1,3 @@
+== Admin Get Delivery Fee Polish API
+
+operation::admin_get_delivery_fee_polish[snippets='http-request,path-parameters,http-response,response-fields']
