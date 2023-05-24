@@ -12,6 +12,7 @@ import java.util.List;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 public record CompanyResponse(long id,
+                              String code,
                               String name,
                               CompanyStatus status,
                               float salesFee,

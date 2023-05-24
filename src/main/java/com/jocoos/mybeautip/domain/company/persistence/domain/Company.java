@@ -27,6 +27,9 @@ public class Company extends CreatedAtBaseEntity {
     @Column(insertable = false, updatable = false)
     private Long id;
 
+    @Column
+    private String code;
+
     @Column(nullable = false)
     private String name;
 
@@ -89,6 +92,10 @@ public class Company extends CreatedAtBaseEntity {
         if (permission != null) {
             permission.mapping(this);
         }
+    }
+
+    public void generateCode() {
+        this.code = String.format("%05d", id);
     }
 
     public Company(CreateCompanyRequest request) {

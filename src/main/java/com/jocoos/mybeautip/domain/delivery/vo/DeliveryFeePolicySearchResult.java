@@ -14,6 +14,7 @@ import java.util.Set;
 public class DeliveryFeePolicySearchResult {
     private long id;
     private String name;
+    private String companyCode;
     private String companyName;
     private boolean isDefault;
     private DeliveryMethod deliveryMethod;
@@ -28,6 +29,7 @@ public class DeliveryFeePolicySearchResult {
 
         this.id = deliveryFeePolicy.getId();
         this.name = deliveryFeePolicy.getName();
+        this.companyCode = company.getCode();
         this.companyName = company.getName();
         this.isDefault = deliveryFeePolicy.isDefault();
         this.deliveryMethod = deliveryFeePolicy.getDeliveryMethod();

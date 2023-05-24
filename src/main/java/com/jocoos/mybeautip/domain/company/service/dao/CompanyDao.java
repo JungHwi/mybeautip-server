@@ -22,8 +22,9 @@ public class CompanyDao {
 
     @Transactional
     public Company create(CreateCompanyRequest request) {
-        Company company = new Company(request);
-        return repository.save(company);
+        Company company = repository.save(new Company(request));
+        company.generateCode();
+        return company;
     }
 
     @Transactional(readOnly = true)

@@ -14,6 +14,7 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 @Builder
 public record DeliveryFeePolicyListResponse(long id,
                                             String name,
+                                            String companyCode,
                                             String companyName,
                                             DeliveryFeeType type,
                                             boolean isDefault,

@@ -4,6 +4,7 @@ rename table `store_likes` to `legacy_store_likes`;
 create table company
 (
     id                  bigint auto_increment primary key comment '공급사 아이디',
+    code                char(5) comment '공급사 코드',
     name                varchar(100) not null comment '공급사명',
     status              varchar(20) not null comment '상태',
     sales_fee           DECIMAL(5, 2) not null comment '판매 수수료 (%)',

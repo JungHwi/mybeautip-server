@@ -83,7 +83,9 @@ public class DeliveryFeePolicyCustomRepositoryImpl implements DeliveryFeePolicyC
 
         return switch (searchField) {
             case DELIVERY_FEE_NAME -> deliveryFeePolicy.name.contains(searchText);
+            case DELIVERY_FEE_CODE -> deliveryFeePolicy.code.contains(searchText);
             case COMPANY_NAME -> deliveryFeePolicy.company.name.contains(searchText);
+            case COMPANY_CODE -> deliveryFeePolicy.company.code.contains(searchText);
         };
     }
 }

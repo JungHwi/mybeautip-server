@@ -4,14 +4,14 @@ import com.jocoos.mybeautip.domain.company.code.CompanyStatus
 import com.jocoos.mybeautip.domain.company.code.ProcessPermission
 import com.jocoos.mybeautip.domain.company.dto.CreateCompanyRequest
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company
-import com.jocoos.mybeautip.domain.company.persistence.repository.CompanyRepository
+import com.jocoos.mybeautip.domain.company.service.dao.CompanyDao
 import com.jocoos.mybeautip.domain.company.vo.CompanyPermissionVo
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.COMPANY_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.PROCESS_PERMISSION
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
-import com.jocoos.mybeautip.testutil.fixture.makeCompany
+import com.jocoos.mybeautip.testutil.fixture.makeCompanyRequest
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class AdminCompanyControllerTest(
-    private val companyRepository: CompanyRepository
+    private val companyDao: CompanyDao
 ) : RestDocsIntegrationTestSupport() {
 
     @Test
@@ -100,6 +100,7 @@ class AdminCompanyControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("공급사 ID"),
+                    fieldWithPath("code").type(STRING).description("공급사 코드"),
                     fieldWithPath("name").type(STRING).description("공급사명"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
                     fieldWithPath("sales_fee").type(NUMBER).description("판매 수수료 (%)"),
@@ -162,6 +163,7 @@ class AdminCompanyControllerTest(
                     fieldWithPath("total").type(NUMBER).description("조회 Total Count"),
                     fieldWithPath("content").type(ARRAY).description("공급사 목록"),
                     fieldWithPath("content.[].id").type(NUMBER).description("공급사 ID"),
+                    fieldWithPath("content.[].code").type(STRING).description("공급사 코드"),
                     fieldWithPath("content.[].name").type(STRING).description("공급사명"),
                     fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
                     fieldWithPath("content.[].sales_fee").type(NUMBER).description("판매 수수료 (%)"),
@@ -198,6 +200,7 @@ class AdminCompanyControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("공급사 ID"),
+                    fieldWithPath("code").type(STRING).description("공급사 코드"),
                     fieldWithPath("name").type(STRING).description("공급사명"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
                     fieldWithPath("sales_fee").type(NUMBER).description("판매 수수료 (%)"),
@@ -308,6 +311,7 @@ class AdminCompanyControllerTest(
                     ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("공급사 ID"),
+                    fieldWithPath("code").type(STRING).description("공급사 코드"),
                     fieldWithPath("name").type(STRING).description("공급사명"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(COMPANY_STATUS)),
                     fieldWithPath("sales_fee").type(NUMBER).description("판매 수수료 (%)"),
@@ -343,6 +347,6 @@ class AdminCompanyControllerTest(
     }
 
     fun saveCompany(): Company {
-        return companyRepository.save(makeCompany())
+        return companyDao.create(makeCompanyRequest())
     }
 }
