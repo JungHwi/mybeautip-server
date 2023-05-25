@@ -55,6 +55,7 @@ class AdminDeliveryFeePolicyControllerTest (
                     fieldWithPath("payment_option").type(STRING).description(generateLinkCode(PAYMENT_OPTION)),
                     fieldWithPath("status").type(STRING).attributes(getDefault("ACTIVE")).description(generateLinkCode(DELIVERY_FEE_STATUS)),
                     fieldWithPath("delivery_method").type(STRING).attributes(getDefault("COURIER")).description(generateLinkCode(DELIVERY_METHOD)),
+                    fieldWithPath("is_default").type(BOOLEAN).attributes(getDefault("false")).description("기본 배송비 여부"),
                     fieldWithPath("details").type(ARRAY).description("배송비 국가별 상세 정보"),
                     fieldWithPath("details.[].country_code").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
                     fieldWithPath("details.[].name").type(STRING).description("국가별 배송비명"),
@@ -220,6 +221,28 @@ class AdminDeliveryFeePolicyControllerTest (
                     fieldWithPath("details.[].threshold").type(NUMBER).description("국가별 배송비 기준"),
                     fieldWithPath("details.[].fee_below_threshold").type(NUMBER).description("기준 미만일때의 배송비"),
                     fieldWithPath("details.[].fee_above_threshold").type(NUMBER).description("기준 이상일때의 배송비"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun patchDefault() {
+        val deliveryFeePolicy = saveDeliveryFee()
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/admin/delivery/fee/{deliveryFeeId}/default", deliveryFeePolicy.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_patch_default_delivery_fee_polish",
+                pathParameters(
+                    parameterWithName("deliveryFeeId").description("배송비 ID")
                 )
             )
         )

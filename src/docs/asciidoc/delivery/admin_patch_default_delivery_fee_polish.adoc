@@ -1,0 +1,3 @@
+== Admin Patch Default Delivery Fee Polish API
+
+operation::admin_patch_default_delivery_fee_polish[snippets='http-request,path-parameters,http-response']

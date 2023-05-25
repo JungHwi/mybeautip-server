@@ -23,8 +23,16 @@ public class DeliveryFeePolicyDao {
     @Transactional
     public DeliveryFeePolicy create(Company company, CreateDeliveryFeePolicyRequest request) {
         request.setCode(generateCode());
-        DeliveryFeePolicy deliveryFeePolicy = new DeliveryFeePolicy(company, request);
 
+        if (request.getIsDefault()) {
+            initializeDefault(company);
+        }
+
+        if (!repository.existsByCompanyAndIsDefault(company, true)) {
+            request.setIsDefault(true);
+        }
+
+        DeliveryFeePolicy deliveryFeePolicy = new DeliveryFeePolicy(company, request);
         return repository.save(deliveryFeePolicy);
     }
 
@@ -37,6 +45,11 @@ public class DeliveryFeePolicyDao {
     public DeliveryFeePolicy get(long deliveryFeeId) {
         return repository.findById(deliveryFeeId)
                 .orElseThrow(() -> new NotFoundException("Delivery fee policy not found. id - " + deliveryFeeId));
+    }
+
+    @Transactional
+    public void initializeDefault(Company company) {
+        repository.initializeDefault(company);
     }
 
     private String generateCode() {

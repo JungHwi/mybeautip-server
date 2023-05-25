@@ -18,6 +18,9 @@ public class CreateDeliveryFeePolicyRequest {
     @Setter
     private String code;
 
+    @Setter
+    private Boolean isDefault;
+
     private String name;
 
     private DeliveryFeeStatus status;
@@ -32,6 +35,7 @@ public class CreateDeliveryFeePolicyRequest {
 
     @Builder
     public CreateDeliveryFeePolicyRequest(long companyId, String name, DeliveryFeeStatus status, DeliveryFeeType type, DeliveryMethod deliveryMethod, PaymentOption paymentOption, List<CreateDeliveryFeePolicyDetailRequest> details) {
+        this.isDefault = false;
         this.companyId = companyId;
         this.name = name;
         this.status = status == null ? DeliveryFeeStatus.ACTIVE : status;

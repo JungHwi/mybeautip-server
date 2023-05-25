@@ -15,7 +15,7 @@ public record DeliveryFeePolicyResponse(long id,
                                         String name,
                                         DeliveryFeeStatus status,
                                         DeliveryFeeType type,
-                                        boolean isDefault,
+                                        Boolean isDefault,
                                         DeliveryMethod deliveryMethod,
                                         PaymentOption paymentOption,
                                         List<DeliveryFeePolicyDetailResponse> details) {

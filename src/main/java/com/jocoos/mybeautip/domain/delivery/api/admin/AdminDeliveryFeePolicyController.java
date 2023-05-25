@@ -8,6 +8,8 @@ import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -45,5 +47,11 @@ public class AdminDeliveryFeePolicyController {
                                           @RequestBody EditDeliveryFeePolicyRequest request) {
 
         return service.edit(deliveryFeeId, request);
+    }
+
+    @PatchMapping("/{deliveryFeeId}/default")
+    public ResponseEntity patchDefault(@PathVariable long deliveryFeeId) {
+        service.patchDefault(deliveryFeeId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

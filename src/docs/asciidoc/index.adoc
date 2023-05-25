@@ -257,6 +257,7 @@ include::overview.adoc[]
 * link:delivery/admin_search_delivery_fee_polish.html[배송비 조회 API, window=_blank]
 * link:delivery/admin_get_delivery_fee_polish.html[배송비 상세 조회 API, window=_blank]
 * link:delivery/admin_edit_delivery_fee_polish.html[배송비 수정 API, window=_blank]
+* link:delivery/admin_patch_default_delivery_fee_polish.html[기본 배송비 설정 API, window=_blank]
 
 === Admin Store API
 * link:store/admin_create_store_category.html[스토어 카테고리 생성 API, window=_blank]

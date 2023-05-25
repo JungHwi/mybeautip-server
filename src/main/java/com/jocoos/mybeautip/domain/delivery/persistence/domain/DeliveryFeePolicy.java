@@ -52,7 +52,7 @@ public class DeliveryFeePolicy extends CreatedAtBaseEntity {
     private DeliveryFeeType type;
 
     @Column
-    private boolean isDefault;
+    private Boolean isDefault;
 
     @Enumerated(EnumType.STRING)
     private DeliveryMethod deliveryMethod;
@@ -102,5 +102,9 @@ public class DeliveryFeePolicy extends CreatedAtBaseEntity {
         for (DeliveryFeePolicyDetail detail: this.details) {
             detail.edit(requestMap.get(detail.getCountryCode()));
         }
+    }
+
+    public void setDefault() {
+        this.isDefault = true;
     }
 }

@@ -16,7 +16,7 @@ public class DeliveryFeePolicySearchResult {
     private String name;
     private String companyCode;
     private String companyName;
-    private boolean isDefault;
+    private Boolean isDefault;
     private DeliveryMethod deliveryMethod;
     private DeliveryFeeType type;
     private Set<DeliveryFeePolicyDetailSearchResult> details;
@@ -31,7 +31,7 @@ public class DeliveryFeePolicySearchResult {
         this.name = deliveryFeePolicy.getName();
         this.companyCode = company.getCode();
         this.companyName = company.getName();
-        this.isDefault = deliveryFeePolicy.isDefault();
+        this.isDefault = deliveryFeePolicy.getIsDefault();
         this.deliveryMethod = deliveryFeePolicy.getDeliveryMethod();
         this.type = deliveryFeePolicy.getType();
         this.createdAt = deliveryFeePolicy.getCreatedAt();

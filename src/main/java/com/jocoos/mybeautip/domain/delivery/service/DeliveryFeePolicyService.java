@@ -49,4 +49,11 @@ public class DeliveryFeePolicyService {
         deliveryFeePolicy.edit(request);
         return converter.converts(deliveryFeePolicy);
     }
+
+    @Transactional
+    public void patchDefault(long deliveryFeeId) {
+        DeliveryFeePolicy deliveryFeePolicy = dao.get(deliveryFeeId);
+        dao.initializeDefault(deliveryFeePolicy.getCompany());
+        deliveryFeePolicy.setDefault();
+    }
 }
