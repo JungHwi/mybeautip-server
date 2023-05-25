@@ -252,7 +252,7 @@ class AdminDeliveryFeePolicyControllerTest (
     @Test
     fun delete() {
         val company = saveCompany()
-        val deliveryFeePolicy1 = saveDeliveryFee(company = company)
+        saveDeliveryFee(company = company)
         val deliveryFeePolicy2 = saveDeliveryFee(company = company)
         val deliveryFeePolicy3 = saveDeliveryFee(company = company)
         val request = DeleteDeliveryFeePolicyRequest(mutableSetOf(deliveryFeePolicy2.id, deliveryFeePolicy3.id))
