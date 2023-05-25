@@ -7,12 +7,16 @@ import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryFeePolicy
 import com.jocoos.mybeautip.domain.delivery.persistence.repository.DeliveryFeePolicyRepository;
 import com.jocoos.mybeautip.domain.delivery.vo.DeliveryFeePolicySearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -50,6 +54,25 @@ public class DeliveryFeePolicyDao {
     @Transactional
     public void initializeDefault(Company company) {
         repository.initializeDefault(company);
+    }
+
+    @Transactional
+    public void delete(Collection<Long> deliveryFeeIds) {
+        if (repository.existsByIdInAndIsDefault(deliveryFeeIds, true)) {
+            throw new BadRequestException(ErrorCode.CAN_NOT_DELETE_DELIVERY_FEE);
+        }
+
+        repository.delete(deliveryFeeIds);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeliveryFeePolicy> findByIds(Collection<Long> deliveryFeeIds) {
+        return repository.findByIdIn(deliveryFeeIds);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeliveryFeePolicy> getDefaultByCompany(Collection<Company> companies) {
+        return repository.findByCompanyInAndIsDefault(companies, true);
     }
 
     private String generateCode() {

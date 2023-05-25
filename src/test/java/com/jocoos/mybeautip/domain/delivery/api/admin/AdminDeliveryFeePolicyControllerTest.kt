@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.delivery.api.admin
 
 import com.jocoos.mybeautip.domain.company.persistence.domain.Company
 import com.jocoos.mybeautip.domain.company.service.dao.CompanyDao
+import com.jocoos.mybeautip.domain.delivery.dto.DeleteDeliveryFeePolicyRequest
 import com.jocoos.mybeautip.domain.delivery.persistence.domain.DeliveryFeePolicy
 import com.jocoos.mybeautip.domain.delivery.service.dao.DeliveryFeePolicyDao
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
@@ -248,8 +249,37 @@ class AdminDeliveryFeePolicyControllerTest (
         )
     }
 
-    fun saveDeliveryFee(): DeliveryFeePolicy {
+    @Test
+    fun delete() {
         val company = saveCompany()
+        val deliveryFeePolicy1 = saveDeliveryFee(company = company)
+        val deliveryFeePolicy2 = saveDeliveryFee(company = company)
+        val deliveryFeePolicy3 = saveDeliveryFee(company = company)
+        val request = DeleteDeliveryFeePolicyRequest(mutableSetOf(deliveryFeePolicy2.id, deliveryFeePolicy3.id))
+
+        val result: ResultActions = mockMvc
+            .perform(
+                delete("/admin/delivery/fee")
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isNoContent)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_delete_delivery_fee_polish",
+                requestFields(
+                    fieldWithPath("delivery_fee_ids").type(ARRAY).description("삭제할 배송비 아이디 목록")
+                )
+            )
+        )
+    }
+
+    fun saveDeliveryFee(
+        company: Company = saveCompany()
+    ): DeliveryFeePolicy {
         return dao.create(company, makeCreateDeliveryFeePolicyRequest(companyId =  company.id))
     }
 

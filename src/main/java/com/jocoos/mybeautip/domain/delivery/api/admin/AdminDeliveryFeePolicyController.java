@@ -54,4 +54,10 @@ public class AdminDeliveryFeePolicyController {
         service.patchDefault(deliveryFeeId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping
+    public ResponseEntity delete(@RequestBody DeleteDeliveryFeePolicyRequest request) {
+        service.delete(request.deliveryFeeIds());
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }

@@ -13,7 +13,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -55,5 +59,33 @@ public class DeliveryFeePolicyService {
         DeliveryFeePolicy deliveryFeePolicy = dao.get(deliveryFeeId);
         dao.initializeDefault(deliveryFeePolicy.getCompany());
         deliveryFeePolicy.setDefault();
+    }
+
+    @Transactional
+    public void delete(Collection<Long> deliveryFeeIds) {
+        dao.delete(deliveryFeeIds);
+        updateDeliveryFeeToDefaultFee(deliveryFeeIds);
+    }
+
+    private void updateDeliveryFeeToDefaultFee(Collection<Long> deliveryFeeIds) {
+        List<DeliveryFeePolicy> deletedList = dao.findByIds(deliveryFeeIds);
+        Map<Company, List<DeliveryFeePolicy>> deletedMap = deletedList.stream()
+                .collect(Collectors.groupingBy(DeliveryFeePolicy::getCompany));
+
+        List<DeliveryFeePolicy> defaultFeeList = dao.getDefaultByCompany(deletedMap.keySet());
+        Map<Company, DeliveryFeePolicy> defaultFeeMap = defaultFeeList.stream()
+                .collect(Collectors.toMap(DeliveryFeePolicy::getCompany, Function.identity()));
+
+        for (Map.Entry<Company, List<DeliveryFeePolicy>> entry : deletedMap.entrySet()) {
+            List<Long> targetDeliveryFeeIds = entry.getValue().stream()
+                    .map(DeliveryFeePolicy::getId)
+                    .collect(Collectors.toList());
+
+            Long defaultFeeId = defaultFeeMap.get(entry.getKey()).getId();
+            // TODO @재훈님 대상이 되는 ID(targetDeliveryFeeIds)와 해당 공급사의 기본 배송비 ID(defaultFeeId) 는 구했습니다. 일괄로 변경하는 메소드 만들어서 주석 제거 해주세요.
+            // storeService.changeDeliveryFee(targetDeliveryFeeIds, defaultFeeId);
+            // preOrderService.changeDeliveryFee(targetDeliveryFeeIds, defaultFeeId);
+        }
+
     }
 }

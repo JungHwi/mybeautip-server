@@ -74,7 +74,7 @@ public class DeliveryFeePolicy extends CreatedAtBaseEntity {
         this.name = request.getName();
         this.status = request.getStatus();
         this.type = request.getType();
-        this.isDefault = false;
+        this.isDefault = request.getIsDefault();
         this.deliveryMethod = request.getDeliveryMethod();
         this.paymentOption = request.getPaymentOption();
 

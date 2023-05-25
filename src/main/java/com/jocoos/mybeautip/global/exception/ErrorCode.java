@@ -92,6 +92,8 @@ public enum ErrorCode implements CodeValue {
 
     // DELIVERY
     ALREADY_DELIVERED("이미 배송"),
+    CAN_NOT_DELETE_DELIVERY_FEE("기본 배송비 삭제 불가능"),
+
 
     // COUPON
     COUPON_NOT_FOUND("쿠폰 정보 없음"),
