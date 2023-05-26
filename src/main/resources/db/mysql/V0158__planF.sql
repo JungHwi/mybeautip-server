@@ -82,8 +82,82 @@ create table store_category_detail
 create table store
 (
     id          bigint auto_increment primary key comment '스토어 아이디',
-    category_id bigint not null comment '카테고리 아이디'
+    category_id bigint not null comment '카테고리 아이디',
+    brand_id bigint not null  comment '브랜드 아이디',
+    delivery_fee_policy_id bigint not null comment '배송비 조건 아이디',
+    country_code char(2) not null comment '국가 코드',
+    status varchar(20) not null comment '스토어 상태',
+    is_visible boolean not null comment '공개 여부',
+    name varchar(50) not null comment '대표 노출 상품명',
+    description varchar(100) comment '상세 정보',
+    is_best boolean not null comment '베스트 태그 여부',
+    is_new boolean not null comment '신규 태그 여부'
 ) charset = utf8mb4 comment '스토어 정보';
+
+create table store_image
+(
+    id          bigint auto_increment primary key comment '스토어 상세 이미지 아이디',
+    store_id    bigint       not null comment '상품 아이디',
+    image       varchar(200) not null comment '이미지 파일명',
+    type        varchar(20)  not null comment '이미지 타입',
+    sort        int          not null comment '이미지 순서',
+    modified_at datetime     not null comment '수정일',
+    created_at  datetime     not null comment '등록일'
+) charset = utf8mb4 comment '스토어 이미지 정보';
+
+create table store_option
+(
+    id                   bigint auto_increment primary key comment '스토어 옵션 아이디',
+    type                 varchar(20) not null comment '옵션 타입',
+    is_visible           boolean     not null comment '공개 여부',
+    is_sold_out          boolean     not null comment '품절 여부',
+    country_product_code varchar(30) not null comment '국가 상품 코드',
+    name                 varchar(50) not null comment '옵션명',
+    stock                int         not null comment '재고',
+    fixed_price          int         not null comment '정상가',
+    purchase_price       int comment '매입가',
+    discount_price       int comment '할인가',
+    discount_rate        decimal comment '할인율',
+    sale_price           int         not null comment '판매가',
+    thumbnail            varchar(16) not null comment '썸네일 파일'
+) charset = utf8mb4 comment '스토어 옵션 정보';
+
+create table store_policy
+(
+    id              bigint auto_increment primary key comment '스토어 약관 및 정책 아이디',
+    store_id        bigint        not null comment '스토어 아이디',
+    delivery_policy varchar(2000) not null comment '배송 정책',
+    product_policy  varchar(2000) not null comment '취소/교환/반품 정책',
+    modified_at     datetime      not null comment '수정일',
+    created_at      datetime      not null comment '등록일'
+) charset = utf8mb4 comment '스토어 약관 및 정책 정보';
+
+create table store_option_product
+(
+    id                bigint auto_increment primary key comment '스토어 옵션 상품 상세 매핑 아이디',
+    store_option_id   bigint not null comment '스토어 옵션 아이디',
+    product_detail_id bigint not null comment '상품 상세 아이디'
+) charset = utf8mb4 comment '스토어 옵션 국가별 상품 매핑 정보';
+
+create table store_option_notice
+(
+    id              bigint auto_increment primary key comment '스토어 옵션 고시정보 아이디',
+    store_option_id bigint        not null comment '스토어 옵션 아이디',
+    notice_type     varchar(50)   not null comment '고시 정보 타입',
+    description     varchar(2000) not null comment '항목 내용',
+    modified_at     datetime      not null comment '수정일',
+    created_at      datetime      not null comment '등록일'
+) charset = utf8mb4 comment '스토어 옵션 고시 정보';
+
+create table store_option_notice_custom
+(
+    id               bigint auto_increment primary key comment '스토어 옵션 커스텀 고시정보 아이디',
+    store_option_id  bigint        not null comment '스토어 옵션 아이디',
+    item_name        varchar(50)   not null comment '항목명',
+    item_description varchar(2000) not null comment '항목 내용',
+    modified_at      datetime      not null comment '수정일',
+    created_at       datetime      not null comment '등록일'
+) charset = utf8mb4 comment '스토어 옵션 커스텀 고시 정보';
 
 create table delivery_company (
     id          bigint auto_increment primary key comment '배송업체 아이디',
@@ -116,6 +190,78 @@ create table delivery_fee_policy_detail (
     fee_above_threshold     int not null comment '조건 이상 배송비'
 ) charset = utf8mb4 comment '배송비 정책 정보';
 
+create table product
+(
+    id          bigint auto_increment primary key comment '상품 아이디',
+    brand_id    bigint      comment '브랜드 아이디',
+    code        char(30)    comment '상품 코드',
+    is_visible  boolean     not null comment '공개 여부',
+    status      varchar(20) not null comment '상품 상태',
+    name        varchar(50) comment '대표 상품명',
+    stock       bigint      comment '재고',
+    weight      int         comment '무게',
+    modified_at datetime    not null comment '수정일',
+    created_at  datetime    not null comment '등록일'
+) charset = utf8mb4 comment '상품 정보';
+
+create table product_image
+(
+    id          bigint auto_increment primary key comment '상품 이미지 아이디',
+    product_id  bigint       not null comment '상품 아이디',
+    image       varchar(200) not null comment '이미지 파일명',
+    sort        int          not null comment '이미지 순서',
+    modified_at datetime     not null comment '수정일',
+    created_at  datetime     not null comment '등록일'
+) charset = utf8mb4 comment '상품 이미지 정보';
+
+create table product_detail
+(
+    id                   bigint auto_increment primary key comment '상품 세부 아이디',
+    product_id           bigint      not null comment '상품 아이디',
+    country_product_code varchar(30) not null comment '국가 상품 코드',
+    country_code         char(2)     not null comment '국가코드',
+    name                 varchar(50) not null comment '상품명',
+    fixed_price          int         not null comment '정상가',
+    purchase_price       int comment '매입가',
+    discount_price       int comment '할인가',
+    discount_rate        decimal comment '할인율',
+    sale_price           int         not null comment '판매가',
+    description          varchar(100) comment '상세 정보',
+    modified_at          datetime    not null comment '수정일',
+    created_at           datetime    not null comment '등록일'
+) charset = utf8mb4 comment '국가별 상품 정보';
+
+create table product_detail_notice
+(
+    id                bigint auto_increment primary key comment '상품 고시정보 아이디',
+    product_detail_id bigint        not null comment '상품 상세 아이디',
+    notice_type       varchar(50)   not null comment '고시 정보 타입',
+    description       varchar(2000) not null comment '항목 내용',
+    modified_at       datetime      not null comment '수정일',
+    created_at        datetime      not null comment '등록일'
+) charset = utf8mb4 comment '국가별 상품 고시 및 정책 정보';
+
+create table product_detail_notice_custom
+(
+    id                bigint auto_increment primary key comment '상품 커스텀 고시정보 아이디',
+    product_detail_id bigint        not null comment '상품 상세 아이디',
+    item_name         varchar(50)   not null comment '항목명',
+    item_description  varchar(2000) not null comment '항목 내용',
+    modified_at       datetime      not null comment '수정일',
+    created_at        datetime      not null comment '등록일'
+) charset = utf8mb4 comment '국가별 상품 커스텀 고시 정보';
+
+create table product_detail_image
+(
+    id                bigint auto_increment primary key comment '상품 이미지 아이디',
+    product_detail_id bigint       not null comment '상품 아이디',
+    image             varchar(200) not null comment '이미지 파일명',
+    type              varchar(20)  not null comment '이미지 타입',
+    sort              int          not null comment '이미지 순서',
+    modified_at       datetime     not null comment '수정일',
+    created_at        datetime     not null comment '등록일'
+) charset = utf8mb4 comment '국가별 상품 이미지 정보';
+
 # delete from flyway_schema_history where version = '0158';
 # drop table company;
 # drop table company_account;
@@ -128,3 +274,9 @@ create table delivery_fee_policy_detail (
 # drop table delivery_company;
 # drop table delivery_fee_policy;
 # drop table delivery_fee_policy_detail;
+# drop table product;
+# drop table product_image;
+# drop table product_detail;
+# drop table product_detail_notice;
+# drop table product_detail_notice_custom;
+# drop table product_detail_image;
