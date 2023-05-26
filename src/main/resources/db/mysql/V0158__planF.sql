@@ -192,24 +192,25 @@ create table delivery_fee_policy_detail (
 create table product
 (
     id          bigint auto_increment primary key comment '상품 아이디',
-    brand_id    bigint      not null comment '브랜드 아이디',
-    code        char(30)    not null comment '상품 코드',
+    brand_id    bigint      comment '브랜드 아이디',
+    code        char(30)    comment '상품 코드',
     is_visible  boolean     not null comment '공개 여부',
     status      varchar(20) not null comment '상품 상태',
-    name        varchar(50) not null comment '대표 상품명',
-    stock       bigint      not null comment '재고',
+    name        varchar(50) comment '대표 상품명',
+    stock       bigint      comment '재고',
+    weight      int         comment '무게',
     modified_at datetime    not null comment '수정일',
     created_at  datetime    not null comment '등록일'
 ) charset = utf8mb4 comment '상품 정보';
 
 create table product_image
 (
-    id           bigint auto_increment primary key comment '상품 이미지 아이디',
-    product_id   bigint       not null comment '상품 아이디',
-    image        varchar(200) not null comment '이미지 파일명',
-    is_thumbnail boolean comment '썸네일 여부',
-    modified_at  datetime     not null comment '수정일',
-    created_at   datetime     not null comment '등록일'
+    id          bigint auto_increment primary key comment '상품 이미지 아이디',
+    product_id  bigint       not null comment '상품 아이디',
+    image       varchar(200) not null comment '이미지 파일명',
+    sort        int          not null comment '이미지 순서',
+    modified_at datetime     not null comment '수정일',
+    created_at  datetime     not null comment '등록일'
 ) charset = utf8mb4 comment '상품 이미지 정보';
 
 create table product_detail
