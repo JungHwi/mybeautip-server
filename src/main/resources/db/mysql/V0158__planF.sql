@@ -262,6 +262,22 @@ create table product_detail_image
     created_at        datetime     not null comment '등록일'
 ) charset = utf8mb4 comment '국가별 상품 이미지 정보';
 
+create table policy (
+    country_code char(2) comment '국가코드',
+    delivery_policy text not null comment '배송 정책',
+    claim_policy text not null comment '취소/교환/반품 정책'
+) charset = utf8mb4 comment '정책';
+
+create table policy_history (
+    id bigint primary key auto_increment comment '약관 및 정책 이력의 아이디',
+    country_code char(2) not null comment '국가코드',
+    before_delivery_policy text not null comment '변경전 배송 정책',
+    before_claim_policy text not null comment '변경전 취소/교환/반품 정책',
+    after_delivery_policy text not null comment '변경후 배송 정책',
+    after_claim_policy text not null comment '변경후 취소/교환/반품 정책',
+    created_at datetime not null comment '등록일시'
+) charset = utf8mb4 comment '정책 이력';
+
 # delete from flyway_schema_history where version = '0158';
 # drop table company;
 # drop table company_account;
