@@ -102,6 +102,10 @@ public class Product extends BaseEntity {
         setWeight(weight);
     }
 
+    public void delete() {
+        this.status = ProductStatus.DELETE;
+    }
+
     private void replaceImages(List<String> imageUrls) {
         // TODO
     }

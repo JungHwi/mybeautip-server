@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+
 @RequiredArgsConstructor
 @Service
 public class ProductDao {
@@ -22,5 +24,10 @@ public class ProductDao {
     public Product get(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("product not found id " + id));
+    }
+
+    @Transactional
+    public void delete(Collection<Long> productIds) {
+        productRepository.delete(productIds);
     }
 }

@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.product.controller;
+package com.jocoos.mybeautip.domain.product.api.front;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
