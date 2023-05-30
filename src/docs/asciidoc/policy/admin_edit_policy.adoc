@@ -1,0 +1,3 @@
+== Admin Edit Policy API
+
+operation::admin_edit_policy[snippets='http-request,path-parameters,request-fields,http-response,response-fields']

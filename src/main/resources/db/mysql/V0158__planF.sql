@@ -280,3 +280,5 @@ create table product_detail_image
 # drop table product_detail_notice;
 # drop table product_detail_notice_custom;
 # drop table product_detail_image;
+# drop table policy;
+# drop table policy_history;

@@ -42,6 +42,7 @@ tools/*.zip
 /src/main/resources/static/docs/operation/
 /src/main/resources/static/docs/placard/
 /src/main/resources/static/docs/notice/
+/src/main/resources/static/docs/policy/
 /src/main/resources/static/docs/system/
 /src/main/resources/static/docs/zzz_test/
 /src/main/resources/static/docs/file/

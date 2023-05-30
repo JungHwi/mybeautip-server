@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.product.api.admin;
 
-import com.jocoos.mybeautip.domain.product.ProductService;
 import com.jocoos.mybeautip.domain.product.dto.DeleteProductRequest;
+import com.jocoos.mybeautip.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
