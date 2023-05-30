@@ -14,6 +14,11 @@ public class AdminPolicyController {
 
     private final PolicyService service;
 
+    @GetMapping("/{countryCode}")
+    public PolicyResponse get(@PathVariable CountryCode countryCode) {
+        return service.get(countryCode);
+    }
+
     @PutMapping("/{countryCode}")
     public PolicyResponse edit(@PathVariable CountryCode countryCode,
                                @RequestBody EditPolicyRequest request) {

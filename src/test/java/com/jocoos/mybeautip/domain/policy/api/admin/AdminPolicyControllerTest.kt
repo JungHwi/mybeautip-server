@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put
 import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.*
@@ -49,6 +50,33 @@ class AdminPolicyControllerTest(
                 requestFields(
                     fieldWithPath("delivery_policy").type(STRING).description("배송 정책"),
                     fieldWithPath("claim_policy").type(STRING).description("취소/교환/반품 정책"),
+                ),
+                responseFields(
+                    fieldWithPath("country_code").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
+                    fieldWithPath("delivery_policy").type(STRING).description("배송 정책"),
+                    fieldWithPath("claim_policy").type(STRING).description("취소/교환/반품 정책"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun get() {
+        val policy = savePolicy()
+
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/policy/{countryCode}", policy.countryCode)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_get_policy",
+                pathParameters(
+                    parameterWithName("countryCode").description(generateLinkCode(COUNTRY_CODE))
                 ),
                 responseFields(
                     fieldWithPath("country_code").type(STRING).description(generateLinkCode(COUNTRY_CODE)),
