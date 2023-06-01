@@ -1,0 +1,3 @@
+== Admin Search Policy History API
+
+operation::admin_search_policy_history[snippets='http-request,request-parameters,http-response,response-fields']

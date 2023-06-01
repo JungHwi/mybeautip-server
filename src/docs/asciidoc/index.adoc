@@ -271,6 +271,7 @@ include::overview.adoc[]
 === Admin Policy API
 * link:policy/admin_edit_policy.html[정책 수정 API, window=_blank]
 * link:policy/admin_get_policy.html[정책 상세 조회 API, window=_blank]
+* link:policy/admin_search_policy_history.html[정책 이력 조회 API, window=_blank]
 
 === Admin EVENT API
 * link:event/admin_create_event.html[이벤트 생성 API, window=_blank]
